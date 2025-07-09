@@ -13,9 +13,12 @@ st.markdown("Real-time Nifty 50 live candlestick chart with Redis persistence.")
 # Redis connection
 REDIS_HOST = "redis-19322.c239.us-east-1-2.ec2.cloud.redislabs.com"
 REDIS_PORT = 19322
-REDIS_PASSWORD = "gjUe5G9dU7mvAbSo8EAYPmkVmS8nsI1L"  # <-- Replace with your Redis password
+REDIS_PASSWORD = "gjUe5G9dU7mvAbSo8EAYPmkVmS8nsI1L"  # Replace with your real password
 
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, decode_responses=True)
+
+# Auto-refresh every 5 seconds
+st.experimental_autorefresh(interval=5000, key="refresh")
 
 # Load data
 data = r.lrange("nifty50_ticks", 0, -1)
@@ -27,11 +30,11 @@ if data:
     # Show tick count
     st.success(f"✅ Collected ticks: {len(df)}")
 
-    # Show live table of last 20 ticks
+    # Show recent ticks
     st.subheader("Recent Nifty 50 Ticks")
     st.dataframe(df.sort_values("time", ascending=False).head(20), use_container_width=True)
 
-    # Create candlestick data
+    # Resample to candles
     df = df.set_index("time")
     candles = df["price"].resample("1Min").ohlc()
 
@@ -66,7 +69,4 @@ if data:
         st.plotly_chart(fig, use_container_width=True)
 
 else:
-    st.warning("No data found in Redis. Start your tick collector script to stream data here.")
-
-# Auto-refresh every 5 seconds
-st.experimental_rerun()
+    st.warning("⚠️ No data found in Redis. Start your tick collector script to stream data here.")
