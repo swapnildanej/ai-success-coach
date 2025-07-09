@@ -1,10 +1,8 @@
-import json
 import streamlit as st
-from streamlit_autorefresh import st_autorefresh
 import pandas as pd
 import plotly.graph_objects as go
 import redis
-from datetime import datetime
+import json
 
 # App title and description
 st.set_page_config(page_title="Khajindaar AI Trading Dashboard", layout="wide")
@@ -15,15 +13,22 @@ st.markdown("Real-time Nifty 50 live candlestick chart with Redis persistence.")
 # Redis connection
 REDIS_HOST = "redis-19322.c239.us-east-1-2.ec2.cloud.redislabs.com"
 REDIS_PORT = 19322
-REDIS_PASSWORD = "gjUe5G9dU7mvAbSo8EAYPmkVmS8nsI1L"  # Replace with your real password
+REDIS_PASSWORD = "gjUe5G9dU7mvAbSo8EAYPmkVmS8nsI1L"  # Replace with your Redis password
 
-r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, decode_responses=True)
+r = redis.Redis(
+    host=REDIS_HOST,
+    port=REDIS_PORT,
+    password=REDIS_PASSWORD,
+    decode_responses=True
+)
 
 # Auto-refresh every 5 seconds
+from streamlit_autorefresh import st_autorefresh
 st_autorefresh(interval=5000, key="refresh")
 
-# Load data
-data = r.lrange("nifty50_ticks", 0, -1)
+# Load data from the correct Redis key
+data = r.lrange("nifty_ticks", 0, -1)
+
 if data:
     ticks = [json.loads(item) for item in data]
     df = pd.DataFrame(ticks)
