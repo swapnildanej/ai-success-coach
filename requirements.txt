@@ -2,3 +2,4 @@ streamlit
 kiteconnect
 pandas
 plotly
+redis
