@@ -1,10 +1,10 @@
+import json
 import streamlit as st
 from streamlit_autorefresh import st_autorefresh
 import pandas as pd
 import plotly.graph_objects as go
 import redis
 from datetime import datetime
-import json
 
 # App title and description
 st.set_page_config(page_title="Khajindaar AI Trading Dashboard", layout="wide")
