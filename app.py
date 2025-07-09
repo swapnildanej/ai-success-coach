@@ -69,4 +69,4 @@ if data:
         st.plotly_chart(fig, use_container_width=True)
 
 else:
-    st.warning("⚠️ No data found in Redis. Start your tick collector script to stream data here.")
+    st.warning("No data found in Redis. Start your tick collector script to stream data here.")
