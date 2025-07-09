@@ -18,7 +18,7 @@ REDIS_PASSWORD = "gjUe5G9dU7mvAbSo8EAYPmkVmS8nsI1L"  # Replace with your real pa
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD, decode_responses=True)
 
 # Auto-refresh every 5 seconds
-st.experimental_autorefresh(interval=5000, key="refresh")
+st_autorefresh(interval=5000, key="refresh")
 
 # Load data
 data = r.lrange("nifty50_ticks", 0, -1)
