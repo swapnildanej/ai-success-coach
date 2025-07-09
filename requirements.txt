@@ -3,3 +3,4 @@ kiteconnect
 pandas
 plotly
 redis
+streamlit-autorefresh
