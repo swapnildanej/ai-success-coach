@@ -10,16 +10,9 @@ psycopg2-binary==2.9.9     # PostgreSQL connector (Supabase backend)
 
 # --- AI / Chat ---
 openai==1.47.0             # For GPT-powered chat
-transformers==4.44.2       # Optional: local models / sentiment analysis
-
-# --- Voice (TTS + STT) ---
-gtts==2.5.4                # Google Text-to-Speech (simple, free)
-speechrecognition==3.10.4  # Speech-to-Text
-pydub==0.25.1              # Audio file handling
 
 # --- Mood tracking / Sentiment ---
 textblob==0.18.0.post0     # Simple sentiment analysis
-scikit-learn==1.5.1        # ML utilities
 
 # --- Scheduling / Reminders ---
 apscheduler==3.10.4        # Schedule reminders/alerts
