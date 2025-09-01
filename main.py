@@ -22,6 +22,13 @@ TG_BOT = os.getenv("TELEGRAM_BOT_TOKEN")
 CRON_SECRET = os.environ["CRON_SECRET"]
 
 app = FastAPI(title="AI Companion MVP")
+@app.get("/")
+def root():
+    return {"message": "AI Companion backend is running 🚀"}
+
+@app.get("/healthz")
+def health():
+    return {"status": "ok"}
 
 app.add_middleware(
     CORSMiddleware,
