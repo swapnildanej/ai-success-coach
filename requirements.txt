@@ -20,3 +20,6 @@ apscheduler==3.10.4        # Schedule reminders/alerts
 # --- Utilities ---
 python-dotenv==1.0.1       # Load environment variables from .env
 requests==2.32.3           # API calls
+python-multipart==0.0.9
+aiofiles==23.2.1
+
