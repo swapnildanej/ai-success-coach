@@ -53,8 +53,7 @@ async def chat(messages: List[dict]):
     """
     try:
         out = client.chat.completions.create(
-            model="gpt-4o-mini",  # cheap + good
-            temperature=0.7,
+            model="gpt-5",
             messages=[{"role": "system", "content": SYSTEM_PROMPT}] + messages[-15:],
         )
         reply = out.choices[0].message.content
