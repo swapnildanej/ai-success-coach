@@ -47,6 +47,10 @@ def detect_time_col():
                 raise
     raise RuntimeError("Could not detect time column. Set REMINDERS_TIME_COL env or create one of: when_at, due_at, remind_at, run_at")
 
+@app.get("/")
+def home():
+    return {"service": "AI Companion Reminders", "status": "running"}
+
 @app.get("/internal/health")
 def health():
     try:
