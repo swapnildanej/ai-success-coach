@@ -1,24 +1,41 @@
 import os
 import asyncio
 import httpx
+import traceback
 from datetime import datetime, timezone
 from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import JSONResponse
 from supabase import create_client, Client  # pip install supabase
 
-app = FastAPI()
+app = FastAPI(title="AI Companion Reminders (Resend Only)")
 
-# Required environment variables
-CRON_SECRET = os.environ["CRON_SECRET"]
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_SERVICE_ROLE = os.environ["SUPABASE_SERVICE_ROLE"]
-RESEND_KEY = os.environ["RESEND_API_KEY"]  # enforce presence
+def must_env(name: str) -> str:
+    v = os.getenv(name)
+    if not v:
+        raise RuntimeError(f"Missing required env var: {name}")
+    return v
+
+# --- Required env vars (fail fast with clear message) ---
+CRON_SECRET = must_env("CRON_SECRET")
+SUPABASE_URL = must_env("SUPABASE_URL")
+SUPABASE_SERVICE_ROLE = must_env("SUPABASE_SERVICE_ROLE")
+RESEND_KEY = must_env("RESEND_API_KEY")
 FROM_EMAIL = os.getenv("FROM_EMAIL", "no-reply@yourdomain.com")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE)
 
+@app.get("/internal/health")
+def health():
+    # simple health with minimal checks
+    try:
+        # lightweight request to confirm supabase client works
+        return {"ok": True, "from_email": FROM_EMAIL}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"ok": False, "error": str(e)})
+
 async def send_email(to: str, subject: str, html: str):
     """Send email via Resend API only."""
-    async with httpx.AsyncClient(timeout=20) as client:
+    async with httpx.AsyncClient(timeout=30) as client:
         r = await client.post(
             "https://api.resend.com/emails",
             headers={"Authorization": f"Bearer {RESEND_KEY}"},
@@ -29,6 +46,7 @@ async def send_email(to: str, subject: str, html: str):
                 "html": html,
             },
         )
+        # If Resend rejects (401/422/etc), this will raise an HTTPStatusError
         r.raise_for_status()
 
 async def deliver(rem):
@@ -46,28 +64,44 @@ async def deliver(rem):
         ).eq("id", rem["id"]).execute()
         return True, None
     except Exception as e:
+        # capture full traceback for debugging
+        err = f"{type(e).__name__}: {e}"
         supabase.table("reminders").update(
-            {"status": "failed", "last_error": str(e)}
+            {"status": "failed", "last_error": err}
         ).eq("id", rem["id"]).execute()
-        return False, str(e)
+        print("EMAIL ERROR:", err)
+        traceback.print_exc()
+        return False, err
 
 @app.post("/internal/run-reminders")
 async def run_reminders(req: Request):
-    if req.query_params.get("secret") != CRON_SECRET:
-        raise HTTPException(status_code=401, detail="bad secret")
+    # wrap entire handler to prevent 500s and return diagnostic JSON
+    try:
+        if req.query_params.get("secret") != CRON_SECRET:
+            raise HTTPException(status_code=401, detail="bad secret")
 
-    now = datetime.now(timezone.utc).isoformat()
-    due = (
-        supabase.table("reminders")
-        .select("*")
-        .is_("sent_at", None)
-        .lte("when_at", now)
-        .execute()
-        .data
-    )
+        now = datetime.now(timezone.utc).isoformat()
+        # due: not sent, schedule <= now (UTC)
+        due = (
+            supabase.table("reminders")
+            .select("*")
+            .is_("sent_at", None)
+            .lte("when_at", now)
+            .execute()
+            .data
+        )
 
-    results = await asyncio.gather(*(deliver(r) for r in due), return_exceptions=False)
-    sent = sum(1 for ok, _ in results if ok)
-    errors = [err for ok, err in results if not ok and err]
+        results = await asyncio.gather(*(deliver(r) for r in due), return_exceptions=False)
+        sent = sum(1 for ok, _ in results if ok)
+        errors = [err for ok, err in results if not ok and err]
 
-    return {"checked": len(due), "sent": sent, "errors": len(errors)}
+        return {"checked": len(due), "sent": sent, "errors": len(errors), "details": errors[:3]}
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Never crash: show descriptive error
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e), "trace": traceback.format_exc().splitlines()[-8:]},
+        )
