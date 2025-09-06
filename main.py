@@ -1,140 +1,81 @@
-import io, os, time, hashlib, hmac, json
+import os, asyncio, httpx
 from datetime import datetime, timezone
-from typing import List, Optional
-from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, JSONResponse
-from openai import OpenAI
-from supabase import create_client, Client
-import requests
+from fastapi import FastAPI, Request, HTTPException
+from supabase import create_client, Client  # pip install supabase
+from email.message import EmailMessage
+import smtplib
 
-load_dotenv()
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
-client = OpenAI(api_key=OPENAI_API_KEY)
+app = FastAPI()
 
-SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_SERVICE_ROLE_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
-sb: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-
-RESEND_API_KEY = os.getenv("RESEND_API_KEY")
-TG_BOT = os.getenv("TELEGRAM_BOT_TOKEN")
 CRON_SECRET = os.environ["CRON_SECRET"]
+SUPABASE_URL = os.environ["SUPABASE_URL"]
+SUPABASE_SERVICE_ROLE = os.environ["SUPABASE_SERVICE_ROLE"]
 
-app = FastAPI(title="AI Companion MVP")
-@app.get("/")
-def root():
-    return {"message": "AI Companion backend is running 🚀"}
+# EITHER Resend (simpler for production)...
+RESEND_KEY = os.getenv("RESEND_API_KEY")     # if using Resend
+FROM_EMAIL = os.getenv("FROM_EMAIL", "no-reply@yourdomain.com")
 
-@app.get("/healthz")
-def health():
-    return {"status": "ok"}
+# ...OR Gmail SMTP (needs App Password)
+SMTP_HOST = os.getenv("SMTP_HOST")           # e.g. smtp.gmail.com
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER")
+SMTP_PASS = os.getenv("SMTP_PASS")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # tighten later
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE)
 
-SYSTEM_PROMPT = (
-    "You are 'Aaroh', a warm, concise AI companion & life coach for India. "
-    "Be supportive, practical, and non-judgmental. Use simple English; sprinkle Hindi/Marathi phrases if detected. "
-    "Focus on goal-setting, mood support, productivity, relationships, and reminders. Keep answers crisp."
-)
-
-# ---------- Chat ----------
-@app.post("/api/chat")
-async def chat(messages: List[dict]):
-    """
-    messages = [{role:'user'|'assistant'|'system', content:'...'}]
-    Frontend already stores chat history; we just return model reply.
-    """
-    try:
-        out = client.chat.completions.create(
-            model="gpt-5",
-            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + messages[-15:],
+async def send_email_resend(to: str, subject: str, html: str):
+    async with httpx.AsyncClient(timeout=20) as client:
+        r = await client.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {RESEND_KEY}"},
+            json={"from": FROM_EMAIL, "to": [to], "subject": subject, "html": html},
         )
-        reply = out.choices[0].message.content
-        return {"reply": reply}
-    except Exception as e:
-        raise HTTPException(500, str(e))
+        r.raise_for_status()
 
-# ---------- Speech-to-Text ----------
-@app.post("/api/transcribe")
-async def transcribe(file: UploadFile = File(...)):
+def send_email_smtp(to: str, subject: str, html: str):
+    msg = EmailMessage()
+    msg["From"] = FROM_EMAIL
+    msg["To"] = to
+    msg["Subject"] = subject
+    msg.set_content("HTML email")
+    msg.add_alternative(html, subtype="html")
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
+        s.starttls()
+        s.login(SMTP_USER, SMTP_PASS)
+        s.send_message(msg)
+
+async def deliver(rem):
+    to = rem["target"]
+    subject = f"Reminder: {rem['title']}"
+    html = f"<p>{rem['title']}</p><p>Scheduled at {rem['when_at']}</p>"
+
     try:
-        audio_bytes = await file.read()
-        out = client.audio.transcriptions.create(
-            model="gpt-4o-transcribe",  # Whisper-based
-            file=("audio.webm", audio_bytes),
-        )
-        return {"text": out.text}
+        if RESEND_KEY:
+            await send_email_resend(to, subject, html)
+        else:
+            send_email_smtp(to, subject, html)
+
+        supabase.table("reminders").update(
+            {"sent_at": datetime.now(timezone.utc).isoformat(), "status": "sent", "last_error": None}
+        ).eq("id", rem["id"]).execute()
+        return True, None
     except Exception as e:
-        raise HTTPException(500, str(e))
-
-# ---------- Text-to-Speech ----------
-@app.post("/api/tts")
-async def tts(text: str = Form(...), voice: str = Form("alloy")):
-    try:
-        speech = client.audio.speech.create(
-            model="gpt-4o-mini-tts",
-            voice=voice,
-            input=text,
-            format="mp3",
-        )
-        return StreamingResponse(io.BytesIO(speech.read()), media_type="audio/mpeg")
-    except Exception as e:
-        raise HTTPException(500, str(e))
-
-# ---------- Reminder Worker ----------
-def send_email(to: str, subject: str, html: str) -> bool:
-    if not RESEND_API_KEY:
-        return False
-    r = requests.post(
-        "https://api.resend.com/emails",
-        headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
-        json={"from": "Aaroh <noreply@yourapp.in>", "to": [to], "subject": subject, "html": html},
-        timeout=15,
-    )
-    return r.status_code in (200, 201)
-
-def send_telegram(chat_id: str, text: str) -> bool:
-    if not TG_BOT:
-        return False
-    url = f"https://api.telegram.org/bot{TG_BOT}/sendMessage"
-    r = requests.post(url, json={"chat_id": chat_id, "text": text}, timeout=15)
-    return r.ok
+        supabase.table("reminders").update(
+            {"status": "failed", "last_error": str(e)}
+        ).eq("id", rem["id"]).execute()
+        return False, str(e)
 
 @app.post("/internal/run-reminders")
-async def run_reminders(request: Request):
-    # simple shared-secret
-    if request.query_params.get("secret") != CRON_SECRET:
-        raise HTTPException(401, "unauthorized")
+async def run_reminders(req: Request):
+    if req.query_params.get("secret") != CRON_SECRET:
+        raise HTTPException(status_code=401, detail="bad secret")
 
-    now = datetime.now(timezone.utc)
-    # fetch due reminders
-    due = sb.table("reminders").select("*").eq("status", "pending").lte("due_at", now.isoformat()).execute().data
-    sent_count = 0
+    # due: not sent, schedule <= now (UTC)
+    now = datetime.now(timezone.utc).isoformat()
+    due = supabase.table("reminders").select("*").is_("sent_at", None).lte("when_at", now).execute().data
 
-    for r in due:
-        ok = False
-        try:
-            if r["channel"] == "email":
-                target = r["target"]
-                if not target:
-                    # fallback to profile email if empty
-                    prof = sb.table("profiles").select("id").eq("id", r["user_id"]).execute()
-                    target = None
-                ok = send_email(target or "", "⏰ Reminder", f"<p>{r['title']}</p>")
-            elif r["channel"] == "telegram":
-                ok = send_telegram(r.get("target"), f"⏰ Reminder: {r['title']}")
-        except Exception:
-            ok = False
+    results = await asyncio.gather(*(deliver(r) for r in due), return_exceptions=False)
+    sent = sum(1 for ok, _ in results if ok)
+    errors = [err for ok, err in results if not ok and err]
 
-        status = "sent" if ok else "failed"
-        sb.table("reminders").update({"status": status, "attempts": r["attempts"] + 1}).eq("id", r["id"]).execute()
-        if ok: sent_count += 1
-
-    return {"checked": len(due), "sent": sent_count}
+    return {"checked": len(due), "sent": sent, "errors": len(errors)}
