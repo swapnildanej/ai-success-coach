@@ -9,7 +9,7 @@ app = FastAPI()
 
 CRON_SECRET = os.environ["CRON_SECRET"]
 SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_SERVICE_ROLE = os.environ["SUPABASE_SERVICE_ROLE_KEY"]
+SUPABASE_SERVICE_ROLE = os.environ["SUPABASE_SERVICE_ROLE"]
 
 # EITHER Resend (simpler for production)...
 RESEND_KEY = os.getenv("RESEND_API_KEY")     # if using Resend
@@ -21,7 +21,7 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PASS = os.getenv("SMTP_PASS")
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE)
 
 async def send_email_resend(to: str, subject: str, html: str):
     async with httpx.AsyncClient(timeout=20) as client:
