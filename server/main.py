@@ -16,11 +16,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from server.routers import chat, affirmations, goals
+from .routers import chat, affirmations, goals
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(affirmations.router, prefix="/affirmations", tags=["affirmations"])
 app.include_router(goals.router, prefix="/goals", tags=["goals"])
 
 @app.get("/health")
 def health():
-    return {"ok": True}
+    return {"status": "ok"}
