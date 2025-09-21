@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import List
-from utils.auth import get_current_user
+from ..utils.auth import get_current_user
 
 router = APIRouter()
 _db = {}  # {uid: [{"id":"1","title":"Study 2h","category":"study"}]}
