@@ -1,3 +1,4 @@
+# server/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -16,7 +17,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from routers import chat, affirmations, goals
+# ⚠️ change to relative imports
+from .routers import chat, affirmations, goals
+
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(affirmations.router, prefix="/affirmations", tags=["affirmations"])
 app.include_router(goals.router, prefix="/goals", tags=["goals"])
