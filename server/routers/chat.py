@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from ..utils.auth import get_current_user
-from ..services.openai_client import coach_reply
+# from ..services.openai_client import coach_reply  # real mode साठी
 
 router = APIRouter()
 
@@ -10,7 +10,8 @@ class ChatIn(BaseModel):
 
 @router.post("/")
 async def chat_endpoint():
-#async def chat(inb: ChatIn, user=Depends(get_current_user)):
-    # TODO: enforce usage limits for free tier here
-    #content = await coach_reply(inb.messages)
-    return {"msg": "chat working (no AI call yet)"}
+    # real mode:
+    # async def chat_endpoint(inb: ChatIn, user=Depends(get_current_user)):
+    #     reply = await coach_reply(inb.messages)
+    #     return {"content": reply}
+    return {"msg": "chat working (no AI call yet)"}  # safe mode
