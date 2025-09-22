@@ -9,6 +9,6 @@ class ChatIn(BaseModel):
     messages: list[dict]
 
 @router.post("/")
-async def chat_endpoint(inb: ChatIn, user=Depends(get_current_user)):
+async def chat_endpoint(inb: ChatIn):   # user=Depends(get_current_user) काढा
     reply = await coach_reply(inb.messages)
     return {"content": reply}
