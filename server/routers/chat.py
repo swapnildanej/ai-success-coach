@@ -1,14 +1,11 @@
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
-from ..utils.auth import get_current_user
-from ..services.openai_client import coach_reply  # तुमचा वास्तविक फंक्शन
+from models.pydantic import ChatRequest, ChatResponse
+from services.openai_client import get_chat_completion
+from utils.auth import verify_bearer
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(verify_bearer)])
 
-class ChatIn(BaseModel):
-    messages: list[dict]
-
-@router.post("/")
-async def chat_endpoint(inb: ChatIn):   # user=Depends(get_current_user) काढा
-    reply = await coach_reply(inb.messages)
-    return {"content": reply}
+@router.post("/", response_model=ChatResponse)
+async def chat_endpoint(body: ChatRequest):
+    reply = await get_chat_completion(body.message, body.history or [])
+    return ChatResponse(reply=reply)
