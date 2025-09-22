@@ -8,7 +8,7 @@ router = APIRouter()
 class ChatIn(BaseModel):
     messages: list[dict]   # [{role:"user"/"assistant", content:"..."}]
 
-@router.post("/chat")
+@router.post("/")
 async def chat_endpoint():
 #async def chat(inb: ChatIn, user=Depends(get_current_user)):
     # TODO: enforce usage limits for free tier here
