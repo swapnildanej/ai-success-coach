@@ -16,11 +16,11 @@ class GoalCreate(BaseModel):
     title: str
     category: str = "habit"
 
-@router.get("", response_model=List[Goal])
+@router.get("/", response_model=List[Goal])
 async def list_goals(user=Depends(get_current_user)):
     return _db.get(user["uid"], [])
 
-@router.post("", response_model=Goal)
+@router.post("/", response_model=Goal)
 async def create_goal(body: GoalCreate, user=Depends(get_current_user)):
     goals = _db.setdefault(user["uid"], [])
     gid = f"g_{len(goals)+1}"
