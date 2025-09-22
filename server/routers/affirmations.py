@@ -1,17 +1,10 @@
 from fastapi import APIRouter, Depends
-from datetime import date
-from ..utils.auth import get_current_user
+from models.pydantic import AffirmationRequest, AffirmationResponse
+from ..utils.auth import verify_bearer
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(verify_bearer)])
 
-SAMPLE_LIST = [
-  "I show up, even when it's hard.",
-  "Small consistent steps create massive results.",
-  "Focus. Finish. Flourish.",
-]
-
-@router.get("/today")
-async def today_affirmation(user=Depends(get_current_user)):
-    # MVP: static pick; later: generate via OpenAI & store in Supabase
-    idx = (hash(user["uid"]) + hash(date.today())) % len(SAMPLE_LIST)
-    return {"date": str(date.today()), "text": SAMPLE_LIST[idx]}
+@router.post("/", response_model=AffirmationResponse)
+async def make_affirmations(body: AffirmationRequest):
+    items = [f"I am committed to {goal}." for goal in body.goals]
+    return AffirmationResponse(affirmations=items[: body.count])
