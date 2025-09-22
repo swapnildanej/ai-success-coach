@@ -9,8 +9,8 @@ class ChatIn(BaseModel):
     messages: list[dict]   # [{role:"user"/"assistant", content:"..."}]
 
 @router.post("/chat")
-async def chat_endpoint(payload: ChatRequest):
+async def chat_endpoint():
 #async def chat(inb: ChatIn, user=Depends(get_current_user)):
     # TODO: enforce usage limits for free tier here
-    content = await coach_reply(inb.messages)
-    return {"reply": content}
+    #content = await coach_reply(inb.messages)
+    return {"msg": "chat working (no AI call yet)"}
