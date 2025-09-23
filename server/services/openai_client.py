@@ -13,7 +13,7 @@ async def coach_reply(messages:list[dict], temperature:float=0.6):
     """
     headers = {"Authorization": f"Bearer {OPENAI_API_KEY}"}
     payload = {
-        "model": "gpt-4o-mini",
+        "model": "gpt-5",
         "messages": [{"role":"system","content":SYSTEM_COACH_PROMPT}] + messages,
         "temperature": temperature
     }
