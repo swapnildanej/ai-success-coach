@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from ..models.schema import ChatRequest, ChatResponse
-from ..services.openai_client import coach_reply
+from ..services.openai_client import get_chat_completion
 from ..utils.auth import get_current_user
 
 router = APIRouter(dependencies=[Depends(get_current_user)])
