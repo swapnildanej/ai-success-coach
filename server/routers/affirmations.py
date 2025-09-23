@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from models.pydantic import AffirmationRequest, AffirmationResponse
+from ..models.schema import AffirmationRequest, AffirmationResponse
 from ..utils.auth import verify_bearer
 
 router = APIRouter(dependencies=[Depends(verify_bearer)])
