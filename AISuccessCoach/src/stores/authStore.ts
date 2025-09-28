@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { supabase, getUser } from '../lib/supabase';
 import { User, AppState } from '../types';
 
@@ -108,7 +109,9 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => 
+        Platform.OS === 'web' && typeof window !== 'undefined' ? window.localStorage : AsyncStorage
+      ),
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
         user: state.user,

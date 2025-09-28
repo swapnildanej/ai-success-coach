@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { Goal } from '../types';
 import { celebrateGoalCompletion, hapticSuccess } from '../lib/notifications';
@@ -155,7 +156,9 @@ export const useGoalsStore = create<GoalsState>()(
     }),
     {
       name: 'goals-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => 
+        Platform.OS === 'web' && typeof window !== 'undefined' ? window.localStorage : AsyncStorage
+      ),
       partialize: (state) => ({
         goals: state.goals,
       }),

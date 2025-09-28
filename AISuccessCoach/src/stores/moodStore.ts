@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { MoodEntry } from '../types';
 
@@ -159,7 +160,9 @@ export const useMoodStore = create<MoodState>()(
     }),
     {
       name: 'mood-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => 
+        Platform.OS === 'web' && typeof window !== 'undefined' ? window.localStorage : AsyncStorage
+      ),
       partialize: (state) => ({
         moodEntries: state.moodEntries,
       }),

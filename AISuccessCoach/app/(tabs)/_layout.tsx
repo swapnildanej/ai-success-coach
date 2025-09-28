@@ -1,9 +1,17 @@
+import { View, Text } from 'react-native';
 import { Tabs, Redirect } from 'expo-router';
 import { useAuthStore } from '../../src/stores/authStore';
 
 export default function TabLayout() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, loading } = useAuthStore();
 
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white' }}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
   if (!isAuthenticated) {
     return <Redirect href="/(auth)/login" />;
   }
