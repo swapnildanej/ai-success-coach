@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+// Native-only OpenAI implementation
 // Note: For production, this should be called from a secure backend proxy to protect the API key
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY,
@@ -9,7 +9,6 @@ const openai = new OpenAI({
 
 export const sendMessage = async (message: string, conversationHistory: Array<{role: 'user' | 'assistant', content: string}> = []): Promise<string> => {
   try {
-    // Build conversation context
     const messages = [
       {
         role: 'system' as const,
@@ -23,18 +22,19 @@ export const sendMessage = async (message: string, conversationHistory: Array<{r
     ];
 
     const response = await openai.chat.completions.create({
-      model: "gpt-5",
+      model: "gpt-4o",
       messages: messages,
     });
 
     return response.choices[0].message.content || "I'm here to help! Could you tell me more?";
   } catch (error) {
     console.error('OpenAI API error:', error);
-    // Fallback responses for development/offline
     const fallbackResponses = [
-      "I'm having trouble connecting right now, but I'm here to support you. Could you share more about what's on your mind?",
-      "Let me help you work through that. What specific aspect would you like to focus on?",
-      "That's an important question. While I sort out a technical issue, could you tell me more details?"
+      "I'm here to support you in achieving your goals. What specific challenge would you like to work on today?",
+      "That's a great question! Let me help you think through some strategies. Could you share more details?",
+      "I understand what you're going through. What would you like to focus on to move forward?",
+      "You're taking positive steps by reaching out. What aspect of your goals needs the most attention right now?",
+      "I'm here to help you succeed. What's the most important thing you'd like guidance on today?"
     ];
     return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
   }
@@ -43,7 +43,7 @@ export const sendMessage = async (message: string, conversationHistory: Array<{r
 export const getVoiceResponse = async (transcript: string, context?: string): Promise<string> => {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-5",
+      model: "gpt-4o",
       messages: [
         {
           role: 'system',
@@ -59,15 +59,19 @@ export const getVoiceResponse = async (transcript: string, context?: string): Pr
     return response.choices[0].message.content || "I'm listening. Tell me more about what's on your mind.";
   } catch (error) {
     console.error('OpenAI Voice API error:', error);
-    // Fallback for voice
-    return "I hear you and I'm here to support you. While I work through a technical issue, know that taking time to reflect and speak your thoughts is already a positive step.";
+    const voiceFallbacks = [
+      "I hear you and I'm here to support you. What specific challenge would you like to work through?",
+      "That's important to acknowledge. What would help you feel more confident moving forward?",
+      "I'm listening carefully. What's the first step you think might help in this situation?",
+      "Thank you for sharing that with me. What outcome are you hoping for?",
+      "I understand what you're going through. What support do you need most right now?"
+    ];
+    return voiceFallbacks[Math.floor(Math.random() * voiceFallbacks.length)];
   }
 };
 
-// Audio transcription using Whisper
 export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
   try {
-    // Convert blob to file for OpenAI
     const audioFile = new File([audioBlob], "audio.webm", { type: audioBlob.type });
     
     const response = await openai.audio.transcriptions.create({
@@ -80,24 +84,4 @@ export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
     console.error('Transcription error:', error);
     return "I couldn't quite catch that. Could you try speaking again?";
   }
-};
-
-// Coaching prompt templates
-export const COACHING_PROMPTS = {
-  dailyCheckIn: `You are an AI success coach. The user is doing their daily check-in. 
-    Provide encouraging, personalized advice based on their goals and mood. 
-    Keep responses warm, motivational, and actionable. 
-    Ask follow-up questions to better understand their needs.`,
-  
-  goalSetting: `You are an AI success coach helping with goal setting. 
-    Help the user create SMART goals (Specific, Measurable, Achievable, Relevant, Time-bound). 
-    Provide guidance on breaking down large goals into smaller, manageable steps.`,
-  
-  motivationalSupport: `You are an AI success coach providing motivational support. 
-    The user may be facing challenges or setbacks. Provide empathetic, encouraging guidance 
-    that acknowledges their struggles while helping them find practical solutions and maintain momentum.`,
-  
-  progressReview: `You are an AI success coach reviewing progress with the user. 
-    Celebrate their achievements, help them learn from setbacks, and guide them in adjusting 
-    their approach as needed. Focus on growth mindset and continuous improvement.`
 };

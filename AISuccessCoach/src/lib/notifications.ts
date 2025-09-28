@@ -45,11 +45,10 @@ export const scheduleGoalReminder = async () => {
       data: { type: 'goal_reminder' },
     },
     trigger: {
-      type: 'calendar' as const,
       hour: 9,
       minute: 0,
       repeats: true,
-    },
+    } as any,
   });
 };
 
@@ -61,11 +60,10 @@ export const scheduleMoodReminder = async () => {
       data: { type: 'mood_reminder' },
     },
     trigger: {
-      type: 'calendar' as const,
       hour: 20,
       minute: 0,
       repeats: true,
-    },
+    } as any,
   });
 };
 
@@ -77,12 +75,11 @@ export const scheduleWeeklyReflection = async () => {
       data: { type: 'weekly_reflection' },
     },
     trigger: {
-      type: 'calendar' as const,
       weekday: 1, // Sunday
       hour: 18,
       minute: 0,
       repeats: true,
-    },
+    } as any,
   });
 };
 
@@ -115,6 +112,8 @@ export const hapticSelection = () => {
 
 // Goal achievement celebration
 export const celebrateGoalCompletion = async (goalTitle: string) => {
+  if (Platform.OS === 'web') return;
+  
   hapticSuccess();
   
   await Notifications.scheduleNotificationAsync({
@@ -129,6 +128,8 @@ export const celebrateGoalCompletion = async (goalTitle: string) => {
 
 // Mood streak notification
 export const celebrateMoodStreak = async (days: number) => {
+  if (Platform.OS === 'web') return;
+  
   hapticSuccess();
   
   await Notifications.scheduleNotificationAsync({

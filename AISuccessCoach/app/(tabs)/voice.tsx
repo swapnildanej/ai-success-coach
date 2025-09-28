@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Audio } from 'expo-av';
 import * as Speech from 'expo-speech';
 import { getVoiceResponse, transcribeAudio } from '../../src/lib/openai';
@@ -13,6 +13,11 @@ export default function VoiceScreen() {
   const [recording, setRecording] = useState<Audio.Recording>();
 
   const startListening = async () => {
+    if (Platform.OS === 'web') {
+      Alert.alert('Voice Recording', 'Voice recording is available on mobile devices. Please type your message or use the mobile app for voice features.');
+      return;
+    }
+
     try {
       await Audio.requestPermissionsAsync();
       await Audio.setAudioModeAsync({

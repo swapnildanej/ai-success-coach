@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { Goal } from '../types';
+import { celebrateGoalCompletion, hapticSuccess } from '../lib/notifications';
 
 interface GoalsState {
   goals: Goal[];
@@ -136,7 +137,18 @@ export const useGoalsStore = create<GoalsState>()(
       },
 
       completeGoal: async (id) => {
+        const goal = get().goals.find(g => g.id === id);
         await get().updateGoal(id, { completed: true, progress: 100 });
+        
+        // Celebrate completion with haptics and notification
+        if (goal) {
+          try {
+            hapticSuccess();
+            await celebrateGoalCompletion(goal.title);
+          } catch (error) {
+            console.log('Celebration feedback failed:', error);
+          }
+        }
       },
 
       clearError: () => set({ error: null }),
