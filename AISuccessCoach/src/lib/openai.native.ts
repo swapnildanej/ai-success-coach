@@ -1,34 +1,21 @@
-import OpenAI from "openai";
-
-// Native-only OpenAI implementation
-// Note: For production, this should be called from a secure backend proxy to protect the API key
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true // Only for development - use backend proxy in production
-});
+import { supabase } from './supabase';
 
 export const sendMessage = async (message: string, conversationHistory: Array<{role: 'user' | 'assistant', content: string}> = []): Promise<string> => {
   try {
-    const messages = [
-      {
-        role: 'system' as const,
-        content: `You are an AI Success Coach. You help users achieve their goals, improve their mindset, and navigate life challenges. Be supportive, encouraging, and provide actionable advice. Keep responses conversational and under 200 words.`
-      },
-      ...conversationHistory,
-      {
-        role: 'user' as const,
-        content: message
+    const { data, error } = await supabase.functions.invoke('chat', {
+      body: {
+        message: message,
+        conversationHistory: conversationHistory
       }
-    ];
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: messages,
     });
 
-    return response.choices[0].message.content || "I'm here to help! Could you tell me more?";
+    if (error) {
+      throw error;
+    }
+
+    return data.response || "I'm here to help! Could you tell me more?";
   } catch (error) {
-    console.error('OpenAI API error:', error);
+    console.error('Chat API error:', error);
     const fallbackResponses = [
       "I'm here to support you in achieving your goals. What specific challenge would you like to work on today?",
       "That's a great question! Let me help you think through some strategies. Could you share more details?",
@@ -42,23 +29,22 @@ export const sendMessage = async (message: string, conversationHistory: Array<{r
 
 export const getVoiceResponse = async (transcript: string, context?: string): Promise<string> => {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: 'system',
-          content: `You are a Voice Success Coach. Respond to voice messages with empathy and actionable guidance. Keep responses under 150 words and speak naturally as if in a conversation. ${context ? `Context: ${context}` : ''}`
-        },
-        {
-          role: 'user',
-          content: transcript
-        }
-      ],
+    const voiceContext = `You are a Voice Success Coach. Respond to voice messages with empathy and actionable guidance. Keep responses under 150 words and speak naturally as if in a conversation. ${context ? `Context: ${context}` : ''}`;
+    
+    const { data, error } = await supabase.functions.invoke('chat', {
+      body: {
+        message: transcript,
+        context: voiceContext
+      }
     });
 
-    return response.choices[0].message.content || "I'm listening. Tell me more about what's on your mind.";
+    if (error) {
+      throw error;
+    }
+
+    return data.response || "I'm listening. Tell me more about what's on your mind.";
   } catch (error) {
-    console.error('OpenAI Voice API error:', error);
+    console.error('Voice Chat API error:', error);
     const voiceFallbacks = [
       "I hear you and I'm here to support you. What specific challenge would you like to work through?",
       "That's important to acknowledge. What would help you feel more confident moving forward?",
@@ -72,14 +58,37 @@ export const getVoiceResponse = async (transcript: string, context?: string): Pr
 
 export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
   try {
-    const audioFile = new File([audioBlob], "audio.webm", { type: audioBlob.type });
+    // For React Native transcription, use direct fetch to handle FormData properly
+    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
     
-    const response = await openai.audio.transcriptions.create({
-      file: audioFile,
-      model: "whisper-1",
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase configuration missing');
+    }
+
+    // Create FormData with proper React Native file handling
+    const formData = new FormData();
+    formData.append('audio', {
+      uri: audioBlob as any, // In RN, this would be the recording URI
+      type: 'audio/webm',
+      name: 'audio.webm',
+    } as any);
+    
+    // Use direct fetch for multipart uploads in React Native
+    const response = await fetch(`${supabaseUrl}/functions/v1/transcribe`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${supabaseKey}`,
+      },
+      body: formData
     });
 
-    return response.text;
+    if (!response.ok) {
+      throw new Error(`Transcription failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.text || "I couldn't quite catch that. Could you try speaking again?";
   } catch (error) {
     console.error('Transcription error:', error);
     return "I couldn't quite catch that. Could you try speaking again?";
