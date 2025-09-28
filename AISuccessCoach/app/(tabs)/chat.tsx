@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
-import { openaiProxy, COACHING_PROMPTS } from '../../src/lib/openai';
+import { sendMessage as sendOpenAIMessage } from '../../src/lib/openai';
 
 interface Message {
   id: string;
@@ -36,20 +36,32 @@ export default function ChatScreen() {
     setIsLoading(true);
 
     try {
-      // In a real implementation, this would call the OpenAI proxy
-      // For now, we'll simulate a response
-      setTimeout(() => {
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          content: "I understand what you're sharing with me. As your AI coach, I want to help you work through this. Could you tell me more about what specific goals you're working toward right now?",
-          role: 'assistant',
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        setIsLoading(false);
-      }, 1500);
+      // Build conversation history for context
+      const conversationHistory = messages.slice(-6).map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+
+      const aiResponse = await sendOpenAIMessage(userMessage.content, conversationHistory);
+      
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: aiResponse,
+        role: 'assistant',
+        timestamp: new Date(),
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error sending message:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "I'm having trouble connecting right now, but I'm here to support you. Could you share more about what's on your mind?",
+        role: 'assistant',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
       setIsLoading(false);
     }
   };

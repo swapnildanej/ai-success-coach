@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, Dimensions } from 'react-native';
+import { VictoryChart, VictoryLine, VictoryTheme, VictoryArea, VictoryAxis, VictoryScatter } from 'victory-native';
 import { useMoodStore } from '../../src/stores/moodStore';
 import { MoodEntry } from '../../src/types';
 
@@ -113,6 +114,51 @@ export default function MoodScreen() {
             </View>
           </View>
         </View>
+
+        {/* Mood Chart */}
+        {moodEntries.length > 0 && (
+          <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
+            <Text className="text-lg font-semibold text-gray-900 mb-4">Mood Over Time</Text>
+            <VictoryChart
+              theme={VictoryTheme.material}
+              height={200}
+              width={Dimensions.get('window').width - 80}
+              padding={{ left: 40, top: 20, right: 40, bottom: 40 }}
+              scale={{ x: "time" }}
+            >
+              <VictoryAxis dependentAxis domain={[1, 7]} />
+              <VictoryAxis />
+              <VictoryArea
+                data={moodEntries.slice(-14).map((entry, index) => ({
+                  x: new Date(entry.created_at),
+                  y: entry.mood_score
+                }))}
+                style={{
+                  data: { fill: "#3B82F6", fillOpacity: 0.6, stroke: "#3B82F6", strokeWidth: 2 }
+                }}
+              />
+              <VictoryLine
+                data={moodEntries.slice(-14).map((entry, index) => ({
+                  x: new Date(entry.created_at),
+                  y: entry.energy_level
+                }))}
+                style={{
+                  data: { stroke: "#22C55E", strokeWidth: 2 }
+                }}
+              />
+            </VictoryChart>
+            <View className="flex-row justify-center mt-2">
+              <View className="flex-row items-center mr-4">
+                <View className="w-3 h-3 bg-primary rounded mr-2" />
+                <Text className="text-xs text-gray-600">Mood</Text>
+              </View>
+              <View className="flex-row items-center">
+                <View className="w-3 h-3 bg-success rounded mr-2" />
+                <Text className="text-xs text-gray-600">Energy</Text>
+              </View>
+            </View>
+          </View>
+        )}
 
         {/* Log New Mood */}
         <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert, Dimensions } from 'react-native';
+import { VictoryChart, VictoryBar, VictoryTheme, VictoryPie, VictoryAxis } from 'victory-native';
 import { useGoalsStore } from '../../src/stores/goalsStore';
 import { Goal } from '../../src/types';
 
@@ -91,6 +92,53 @@ export default function GoalsScreen() {
             </View>
           </View>
         </View>
+
+        {/* Progress Chart */}
+        {goals.length > 0 && (
+          <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
+            <Text className="text-lg font-semibold text-gray-900 mb-4">Progress by Category</Text>
+            <VictoryChart
+              theme={VictoryTheme.material}
+              height={200}
+              width={Dimensions.get('window').width - 80}
+              padding={{ left: 60, top: 20, right: 40, bottom: 40 }}
+            >
+              <VictoryAxis dependentAxis />
+              <VictoryAxis />
+              <VictoryBar
+                data={Object.entries(
+                  goals.reduce((acc, goal) => {
+                    acc[goal.category] = (acc[goal.category] || 0) + goal.progress;
+                    return acc;
+                  }, {} as Record<string, number>)
+                ).map(([category, progress]) => ({ x: category, y: progress }))}
+                style={{
+                  data: { fill: "#3B82F6" }
+                }}
+              />
+            </VictoryChart>
+          </View>
+        )}
+
+        {/* Category Distribution */}
+        {goals.length > 0 && (
+          <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
+            <Text className="text-lg font-semibold text-gray-900 mb-4">Goals by Category</Text>
+            <View className="items-center">
+              <VictoryPie
+                data={Object.entries(
+                  goals.reduce((acc, goal) => {
+                    acc[goal.category] = (acc[goal.category] || 0) + 1;
+                    return acc;
+                  }, {} as Record<string, number>)
+                ).map(([category, count]) => ({ x: category, y: count }))}
+                width={Dimensions.get('window').width - 80}
+                height={200}
+                colorScale={["#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6"]}
+              />
+            </View>
+          </View>
+        )}
 
         {/* Goals List */}
         {goals.map((goal) => (

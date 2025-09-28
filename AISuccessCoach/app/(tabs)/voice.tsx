@@ -1,38 +1,76 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { Audio } from 'expo-av';
 import * as Speech from 'expo-speech';
+import { getVoiceResponse, transcribeAudio } from '../../src/lib/openai';
+import { hapticImpact, hapticSuccess } from '../../src/lib/notifications';
 
 export default function VoiceScreen() {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [response, setResponse] = useState('');
+  const [recording, setRecording] = useState<Audio.Recording>();
 
   const startListening = async () => {
-    // TODO: Implement voice recording and transcription with Expo AV + OpenAI Whisper
-    setIsListening(true);
+    try {
+      await Audio.requestPermissionsAsync();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      setRecording(recording);
+      setIsListening(true);
+      hapticImpact('light');
+      
+      // Auto-stop after 30 seconds
+      setTimeout(() => {
+        if (isListening) {
+          stopListening();
+        }
+      }, 30000);
+    } catch (err) {
+      Alert.alert('Error', 'Failed to start recording');
+      console.error('Failed to start recording', err);
+    }
+  };
+
+  const stopListening = async () => {
+    if (!recording) return;
+
+    setIsListening(false);
+    hapticImpact('medium');
     
-    // Simulate recording for demo
-    setTimeout(() => {
-      setIsListening(false);
-      setTranscript("I want to improve my productivity and focus better at work.");
-      handleVoiceInput("I want to improve my productivity and focus better at work.");
-    }, 3000);
+    try {
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      if (uri) {
+        // Convert to blob for transcription
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        
+        const transcribedText = await transcribeAudio(blob);
+        setTranscript(transcribedText);
+        handleVoiceInput(transcribedText);
+      }
+    } catch (error) {
+      console.error('Error stopping recording:', error);
+      Alert.alert('Error', 'Failed to process recording');
+    }
+    
+    setRecording(undefined);
   };
 
   const handleVoiceInput = async (text: string) => {
     try {
-      // TODO: Send to OpenAI for processing
-      const coachResponse = `I understand you want to improve your productivity and focus at work. Let me suggest a few strategies:
-
-1. Try the Pomodoro Technique - work for 25 minutes, then take a 5-minute break
-2. Eliminate distractions by turning off notifications during focused work time  
-3. Start each day by identifying your top 3 priority tasks
-
-Would you like me to help you create a specific productivity plan?`;
-
+      const coachResponse = await getVoiceResponse(text);
       setResponse(coachResponse);
       speakResponse(coachResponse);
+      hapticSuccess();
     } catch (error) {
       Alert.alert('Error', 'Failed to process voice input');
     }
