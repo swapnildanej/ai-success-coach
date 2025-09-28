@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert, Dimensions } from 'react-native';
-import { VictoryChart, VictoryBar, VictoryTheme, VictoryPie, VictoryAxis } from 'victory-native';
 import { useGoalsStore } from '../../src/stores/goalsStore';
 import { Goal } from '../../src/types';
 
@@ -93,30 +92,29 @@ export default function GoalsScreen() {
           </View>
         </View>
 
-        {/* Progress Chart */}
+        {/* Progress by Category */}
         {goals.length > 0 && (
           <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
             <Text className="text-lg font-semibold text-gray-900 mb-4">Progress by Category</Text>
-            <VictoryChart
-              theme={VictoryTheme.material}
-              height={200}
-              width={Dimensions.get('window').width - 80}
-              padding={{ left: 60, top: 20, right: 40, bottom: 40 }}
-            >
-              <VictoryAxis dependentAxis />
-              <VictoryAxis />
-              <VictoryBar
-                data={Object.entries(
-                  goals.reduce((acc, goal) => {
-                    acc[goal.category] = (acc[goal.category] || 0) + goal.progress;
-                    return acc;
-                  }, {} as Record<string, number>)
-                ).map(([category, progress]) => ({ x: category, y: progress }))}
-                style={{
-                  data: { fill: "#3B82F6" }
-                }}
-              />
-            </VictoryChart>
+            {Object.entries(
+              goals.reduce((acc, goal) => {
+                acc[goal.category] = (acc[goal.category] || 0) + goal.progress;
+                return acc;
+              }, {} as Record<string, number>)
+            ).map(([category, progress]) => (
+              <View key={category} className="mb-3">
+                <View className="flex-row justify-between mb-1">
+                  <Text className="text-sm font-medium text-gray-700 capitalize">{category}</Text>
+                  <Text className="text-sm font-semibold text-gray-900">{Math.round(progress)}%</Text>
+                </View>
+                <View className="w-full bg-gray-200 rounded-full h-2">
+                  <View 
+                    className="h-2 rounded-full bg-primary"
+                    style={{ width: `${Math.min(100, progress)}%` }}
+                  />
+                </View>
+              </View>
+            ))}
           </View>
         )}
 
@@ -124,19 +122,27 @@ export default function GoalsScreen() {
         {goals.length > 0 && (
           <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
             <Text className="text-lg font-semibold text-gray-900 mb-4">Goals by Category</Text>
-            <View className="items-center">
-              <VictoryPie
-                data={Object.entries(
-                  goals.reduce((acc, goal) => {
-                    acc[goal.category] = (acc[goal.category] || 0) + 1;
-                    return acc;
-                  }, {} as Record<string, number>)
-                ).map(([category, count]) => ({ x: category, y: count }))}
-                width={Dimensions.get('window').width - 80}
-                height={200}
-                colorScale={["#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6"]}
-              />
-            </View>
+            {Object.entries(
+              goals.reduce((acc, goal) => {
+                acc[goal.category] = (acc[goal.category] || 0) + 1;
+                return acc;
+              }, {} as Record<string, number>)
+            ).map(([category, count], index) => {
+              const colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500'];
+              const percentage = Math.round((count / goals.length) * 100);
+              return (
+                <View key={category} className="flex-row items-center justify-between py-2">
+                  <View className="flex-row items-center flex-1">
+                    <View className={`w-4 h-4 rounded-full mr-3 ${colors[index % colors.length]}`} />
+                    <Text className="text-sm font-medium text-gray-700 capitalize">{category}</Text>
+                  </View>
+                  <View className="flex-row items-center">
+                    <Text className="text-sm text-gray-600 mr-2">{count} goals</Text>
+                    <Text className="text-sm font-semibold text-gray-900 w-8">{percentage}%</Text>
+                  </View>
+                </View>
+              );
+            })}
           </View>
         )}
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, Dimensions } from 'react-native';
-import { VictoryChart, VictoryLine, VictoryTheme, VictoryArea, VictoryAxis, VictoryScatter } from 'victory-native';
 import { useMoodStore } from '../../src/stores/moodStore';
 import { MoodEntry } from '../../src/types';
 
@@ -115,39 +114,28 @@ export default function MoodScreen() {
           </View>
         </View>
 
-        {/* Mood Chart */}
+        {/* Mood Over Time - Simple List View */}
         {moodEntries.length > 0 && (
           <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-            <Text className="text-lg font-semibold text-gray-900 mb-4">Mood Over Time</Text>
-            <VictoryChart
-              theme={VictoryTheme.material}
-              height={200}
-              width={Dimensions.get('window').width - 80}
-              padding={{ left: 40, top: 20, right: 40, bottom: 40 }}
-              scale={{ x: "time" }}
-            >
-              <VictoryAxis dependentAxis domain={[1, 7]} />
-              <VictoryAxis />
-              <VictoryArea
-                data={moodEntries.slice(-14).map((entry, index) => ({
-                  x: new Date(entry.created_at),
-                  y: entry.mood_score
-                }))}
-                style={{
-                  data: { fill: "#3B82F6", fillOpacity: 0.6, stroke: "#3B82F6", strokeWidth: 2 }
-                }}
-              />
-              <VictoryLine
-                data={moodEntries.slice(-14).map((entry, index) => ({
-                  x: new Date(entry.created_at),
-                  y: entry.energy_level
-                }))}
-                style={{
-                  data: { stroke: "#22C55E", strokeWidth: 2 }
-                }}
-              />
-            </VictoryChart>
-            <View className="flex-row justify-center mt-2">
+            <Text className="text-lg font-semibold text-gray-900 mb-4">Recent Mood & Energy</Text>
+            {moodEntries.slice(-7).reverse().map((entry, index) => (
+              <View key={entry.id} className="flex-row items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                <Text className="text-sm text-gray-600">
+                  {new Date(entry.created_at).toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' })}
+                </Text>
+                <View className="flex-row items-center">
+                  <View className="flex-row items-center mr-4">
+                    <View className="w-2 h-2 bg-primary rounded-full mr-2" />
+                    <Text className="text-sm font-medium">Mood: {entry.mood_score}</Text>
+                  </View>
+                  <View className="flex-row items-center">
+                    <View className="w-2 h-2 bg-success rounded-full mr-2" />
+                    <Text className="text-sm font-medium">Energy: {entry.energy_level}</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+            <View className="flex-row justify-center mt-4 pt-2 border-t border-gray-100">
               <View className="flex-row items-center mr-4">
                 <View className="w-3 h-3 bg-primary rounded mr-2" />
                 <Text className="text-xs text-gray-600">Mood</Text>
