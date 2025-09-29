@@ -53,6 +53,11 @@ export const supabase = {
 // Database helper functions
 export const getUser = async () => {
   try {
+    // If using placeholder credentials, skip auth check
+    if (supabaseUrl === 'https://placeholder.supabase.co' || supabaseAnonKey === 'placeholder-key') {
+      return null;
+    }
+    
     const { data: { user } } = await supabase.auth.getUser();
     return user;
   } catch (error) {

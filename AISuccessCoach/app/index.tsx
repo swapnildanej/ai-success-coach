@@ -6,8 +6,6 @@ import { useAuthStore } from '../src/stores/authStore';
 export default function Index() {
   const { isAuthenticated, loading } = useAuthStore();
 
-  console.log('Index - Loading:', loading, 'Authenticated:', isAuthenticated);
-
   // Show loading state while checking authentication
   if (loading) {
     return (
@@ -18,8 +16,8 @@ export default function Index() {
     );
   }
 
-  // Redirect based on authentication status
+  // Redirect based on authentication status using grouped routes
   return isAuthenticated ? 
-    <Redirect href="/dashboard" /> : 
-    <Redirect href="/login" />;
+    <Redirect href="/(tabs)" /> : 
+    <Redirect href="/(auth)/login" />;
 }
