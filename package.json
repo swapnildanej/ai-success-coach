@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "babel-plugin-transform-import-meta": "^2.3.3",
     "expo-av": "^16.0.7",
     "expo-haptics": "^15.0.7",
     "expo-notifications": "^0.32.11",

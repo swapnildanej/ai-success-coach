@@ -10,6 +10,7 @@ export default function RootLayout() {
   const { checkAuth } = useAuthStore();
 
   useEffect(() => {
+    // Re-enable checkAuth with dynamic import fix
     checkAuth();
     
     // Initialize notifications (only on mobile platforms)

@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
@@ -6,19 +5,60 @@ import { Platform } from 'react-native';
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+// Dynamic import to avoid import.meta issues on web
+let supabaseClient: any = null;
+
+const createSupabaseClient = async () => {
+  if (!supabaseClient) {
+    const { createClient } = await import('@supabase/supabase-js');
+    supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        storage: Platform.OS === 'web' && typeof window !== 'undefined' ? window.localStorage : AsyncStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false,
+      },
+    });
+  }
+  return supabaseClient;
+};
+
+export const supabase = {
   auth: {
-    storage: Platform.OS === 'web' && typeof window !== 'undefined' ? window.localStorage : AsyncStorage,
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
+    signInWithPassword: async (...args: any[]) => {
+      const client = await createSupabaseClient();
+      return client.auth.signInWithPassword(...args);
+    },
+    signUp: async (...args: any[]) => {
+      const client = await createSupabaseClient();
+      return client.auth.signUp(...args);
+    },
+    signOut: async () => {
+      const client = await createSupabaseClient();
+      return client.auth.signOut();
+    },
+    getUser: async () => {
+      const client = await createSupabaseClient();
+      return client.auth.getUser();
+    },
   },
-});
+  functions: {
+    invoke: async (...args: any[]) => {
+      const client = await createSupabaseClient();
+      return client.functions.invoke(...args);
+    },
+  },
+};
 
 // Database helper functions
 export const getUser = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    return user;
+  } catch (error) {
+    console.log('Auth check failed:', error);
+    return null;
+  }
 };
 
 export const signOut = async () => {
