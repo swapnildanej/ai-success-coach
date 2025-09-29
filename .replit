@@ -21,7 +21,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd AISuccessCoach && PORT=5000 expo start --clear"
+args = "cd AISuccessCoach && expo start --port 8082"
 
 [workflows.workflow.metadata]
 outputType = "console"
@@ -39,7 +39,7 @@ localPort = 8081
 externalPort = 8081
 
 [[ports]]
-localPort = 33217
+localPort = 8082
 externalPort = 4200
 
 [[ports]]
