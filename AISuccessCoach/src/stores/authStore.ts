@@ -19,7 +19,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       isAuthenticated: false,
       user: null,
-      loading: false,
+      loading: true, // Start with loading true to trigger checkAuth
       error: null,
 
       signIn: async (email: string, password: string) => {

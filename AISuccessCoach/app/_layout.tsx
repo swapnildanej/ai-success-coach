@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
-import '../src/styles/global.css';
+// import '../src/styles/global.css'; // Temporarily disabled for web compatibility
 import { useAuthStore } from '../src/stores/authStore';
 import { setupNotifications, scheduleGoalReminder, scheduleMoodReminder, scheduleWeeklyReflection } from '../src/lib/notifications';
 
