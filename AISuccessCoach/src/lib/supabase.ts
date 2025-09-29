@@ -1,54 +1,22 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import { createClient } from '@supabase/supabase-js';
 
 // Use environment variables directly for Expo web/dev
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
 
-// Dynamic import to avoid import.meta issues on web
-let supabaseClient: any = null;
-
-const createSupabaseClient = async () => {
-  if (!supabaseClient) {
-    const { createClient } = await import('@supabase/supabase-js');
-    supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        storage: Platform.OS === 'web' && typeof window !== 'undefined' ? window.localStorage : AsyncStorage,
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: false,
-      },
-    });
-  }
-  return supabaseClient;
-};
-
-export const supabase = {
+// Create Supabase client directly (no dynamic import)
+const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    signInWithPassword: async (...args: any[]) => {
-      const client = await createSupabaseClient();
-      return client.auth.signInWithPassword(...args);
-    },
-    signUp: async (...args: any[]) => {
-      const client = await createSupabaseClient();
-      return client.auth.signUp(...args);
-    },
-    signOut: async () => {
-      const client = await createSupabaseClient();
-      return client.auth.signOut();
-    },
-    getUser: async () => {
-      const client = await createSupabaseClient();
-      return client.auth.getUser();
-    },
+    storage: Platform.OS === 'web' && typeof window !== 'undefined' ? window.localStorage : AsyncStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false,
   },
-  functions: {
-    invoke: async (...args: any[]) => {
-      const client = await createSupabaseClient();
-      return client.functions.invoke(...args);
-    },
-  },
-};
+});
+
+export const supabase = supabaseClient;
 
 // Database helper functions
 export const getUser = async () => {
