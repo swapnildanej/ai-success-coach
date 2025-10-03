@@ -70,8 +70,8 @@ export const transcribeAudio = async (audioBlob: Blob): Promise<string> => {
     const formData = new FormData();
     formData.append('audio', {
       uri: audioBlob as any, // In RN, this would be the recording URI
-      type: 'audio/webm',
-      name: 'audio.webm',
+      type: 'audio/m4a',
+      name: 'audio.m4a',
     } as any);
     
     // Use direct fetch for multipart uploads in React Native

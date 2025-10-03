@@ -77,9 +77,14 @@ export default function VoiceCoachScreen() {
         text: transcript,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, userMessage]);
+      
+      let updatedMessages: VoiceMessage[] = [];
+      setMessages(prev => {
+        updatedMessages = [...prev, userMessage];
+        return updatedMessages;
+      });
 
-      const conversationContext = messages.slice(-3).map(m => `${m.type}: ${m.text}`).join('\n');
+      const conversationContext = updatedMessages.slice(-4).map(m => `${m.type}: ${m.text}`).join('\n');
       const aiResponse = await getVoiceResponse(transcript, conversationContext);
       
       const assistantMessage: VoiceMessage = {
