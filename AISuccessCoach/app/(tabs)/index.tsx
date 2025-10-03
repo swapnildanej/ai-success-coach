@@ -38,11 +38,8 @@ export default function DashboardScreen() {
         <Text className="text-3xl font-bold text-gray-900 mb-2">
           {getGreeting()}, {user?.email?.split('@')[0] || 'there'}!
         </Text>
-        <Text className="text-base text-gray-500 mb-2">
+        <Text className="text-base text-gray-500 mb-6">
           Your manifestation journey starts here
-        </Text>
-        <Text className="text-xs text-green-600 font-bold mb-4">
-          ✅ NEW UI LOADED - Oct 3, 2025
         </Text>
 
         {/* Today's Motivation Card */}
