@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Animated } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { sendMessage as sendOpenAIMessage } from '../../src/lib/openai';
 
@@ -123,104 +122,103 @@ export default function ChatScreen() {
     );
   };
 
+  const handleQuickStart = () => {
+    setInputText('How can I set and achieve my goals effectively?');
+  };
+
+  const hasMessages = messages.length === 0;
+
   return (
     <KeyboardAvoidingView 
-      className="flex-1 bg-background"
+      className="flex-1 bg-white"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={90}
     >
-      {/* Header with Gradient */}
-      <LinearGradient
-        colors={['#3B82F6', '#2563EB']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ paddingHorizontal: 24, paddingTop: 48, paddingBottom: 24 }}
-      >
-        <View className="flex-row items-center">
-          <View className="w-12 h-12 rounded-full bg-white/20 items-center justify-center mr-3">
-            <Text className="text-2xl">🤖</Text>
-          </View>
-          <View className="flex-1">
-            <Text className="text-white text-xl font-bold">AI Success Coach</Text>
-            <View className="flex-row items-center mt-1">
-              <View className="w-2 h-2 rounded-full bg-green-400 mr-2" />
-              <Text className="text-white/80 text-sm">Online</Text>
-            </View>
-          </View>
-        </View>
-      </LinearGradient>
+      {/* Header */}
+      <View className="px-6 pt-12 pb-4 border-b border-gray-100">
+        <Text className="text-3xl font-bold text-gray-900 mb-2">Chat</Text>
+        <Text className="text-base text-gray-500">Chat with your AI Success Coach</Text>
+      </View>
 
       {/* Messages */}
       <ScrollView 
         ref={scrollViewRef}
-        className="flex-1 px-4 pt-4"
-        contentContainerStyle={{ paddingBottom: 20 }}
+        className="flex-1 px-6"
+        contentContainerStyle={{ paddingTop: 20, paddingBottom: 20 }}
       >
-        {messages.map((message) => (
-          <View
-            key={message.id}
-            className={`mb-4 ${message.role === 'user' ? 'items-end' : 'items-start'}`}
-          >
-            {message.role === 'assistant' && (
-              <View className="w-8 h-8 rounded-full bg-primary-100 items-center justify-center mb-2">
-                <Text className="text-sm">🤖</Text>
-              </View>
-            )}
-            {message.role === 'user' ? (
-              <View className="max-w-[80%] rounded-3xl rounded-tr-md overflow-hidden">
-                <LinearGradient
-                  colors={['#3B82F6', '#6366F1']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{ padding: 16 }}
-                >
-                  <Text className="text-white text-base leading-6">
-                    {message.content}
-                  </Text>
-                  <Text className="text-white/70 text-xs mt-2">
-                    {message.timestamp.toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                  </Text>
-                </LinearGradient>
-              </View>
-            ) : (
-              <View className="max-w-[80%] bg-white p-4 rounded-3xl rounded-tl-md shadow-card">
-                <Text className="text-gray-900 text-base leading-6">
-                  {message.content}
-                </Text>
-                <Text className="text-gray-500 text-xs mt-2">
-                  {message.timestamp.toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                </Text>
-              </View>
-            )}
+        {hasMessages ? (
+          <View className="flex-1 items-center justify-center py-12">
+            <View className="bg-gray-100 rounded-full w-24 h-24 items-center justify-center mb-6">
+              <Text className="text-4xl">🤖</Text>
+            </View>
+            <Text className="text-2xl font-bold text-gray-900 mb-4">Start a conversation</Text>
+            <Text className="text-base text-gray-600 text-center mb-8 px-8">
+              Ask me about achieving your goals, building habits, improving your mindset, or how to use the app features. I'm here to help!
+            </Text>
+            <TouchableOpacity
+              onPress={handleQuickStart}
+              className="bg-primary rounded-full px-6 py-3"
+              activeOpacity={0.8}
+            >
+              <Text className="text-white font-semibold">Ask about goal setting</Text>
+            </TouchableOpacity>
+            <Text className="text-sm text-gray-400 mt-4">Or type your own question below</Text>
           </View>
-        ))}
+        ) : (
+          <>
+            {messages.map((message) => (
+              <View
+                key={message.id}
+                className={`mb-4 ${message.role === 'user' ? 'items-end' : 'items-start'}`}
+              >
+                {message.role === 'assistant' && (
+                  <View className="w-8 h-8 rounded-full bg-primary items-center justify-center mb-2">
+                    <Text className="text-sm">🤖</Text>
+                  </View>
+                )}
+                {message.role === 'user' ? (
+                  <View className="flex-row items-center">
+                    <View className="max-w-[80%] bg-primary rounded-3xl rounded-tr-md p-4">
+                      <Text className="text-white text-base leading-6">
+                        {message.content}
+                      </Text>
+                    </View>
+                    <View className="w-8 h-8 rounded-full bg-gray-900 items-center justify-center ml-2">
+                      <Text className="text-sm">👤</Text>
+                    </View>
+                  </View>
+                ) : (
+                  <View className="max-w-[80%] bg-gray-100 p-4 rounded-3xl rounded-tl-md">
+                    <Text className="text-gray-900 text-base leading-6">
+                      {message.content}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            ))}
 
-        {isLoading && (
-          <View className="items-start mb-4">
-            <View className="w-8 h-8 rounded-full bg-primary-100 items-center justify-center mb-2">
-              <Text className="text-sm">🤖</Text>
-            </View>
-            <View className="bg-white p-4 rounded-3xl rounded-tl-md shadow-card">
-              <TypingIndicator />
-            </View>
-          </View>
+            {isLoading && (
+              <View className="items-start mb-4">
+                <View className="w-8 h-8 rounded-full bg-primary items-center justify-center mb-2">
+                  <Text className="text-sm">🤖</Text>
+                </View>
+                <View className="bg-gray-100 p-4 rounded-3xl rounded-tl-md">
+                  <TypingIndicator />
+                </View>
+              </View>
+            )}
+          </>
         )}
       </ScrollView>
 
       {/* Input */}
-      <View className="bg-white px-4 py-3 border-t border-gray-100">
-        <View className="flex-row items-center bg-gray-100 rounded-full px-4 py-2">
+      <View className="bg-white px-6 py-4 border-t border-gray-100">
+        <View className="flex-row items-center bg-gray-100 rounded-full px-5 py-2">
           <TextInput
-            className="flex-1 text-base py-2 max-h-24"
+            className="flex-1 text-base py-2"
             value={inputText}
             onChangeText={setInputText}
-            placeholder="Message your coach..."
+            placeholder="Type your message..."
             placeholderTextColor="#9CA3AF"
             multiline
             maxLength={1000}
@@ -231,20 +229,7 @@ export default function ChatScreen() {
             activeOpacity={0.7}
             className="ml-2"
           >
-            {inputText.trim() && !isLoading ? (
-              <View className="w-10 h-10 rounded-full overflow-hidden">
-                <LinearGradient
-                  colors={['#3B82F6', '#2563EB']}
-                  style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
-                >
-                  <Text className="text-white text-lg">↑</Text>
-                </LinearGradient>
-              </View>
-            ) : (
-              <View className="w-10 h-10 rounded-full bg-gray-300 items-center justify-center">
-                <Text className="text-white text-lg">↑</Text>
-              </View>
-            )}
+            <Text className="text-2xl">{inputText.trim() && !isLoading ? '✈️' : '📤'}</Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -1,318 +1,294 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { useMoodStore } from '../../src/stores/moodStore';
 
-export default function MoodScreen() {
-  const { moodEntries, loading, error, fetchMoodEntries, createMoodEntry, getMoodTrends } = useMoodStore();
-  const [selectedMood, setSelectedMood] = useState(5);
-  const [selectedEnergy, setSelectedEnergy] = useState(5);
-  const [notes, setNotes] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+type Tab = 'affirmations' | 'gratitude' | 'visualize';
 
-  useEffect(() => {
-    fetchMoodEntries();
-  }, []);
+interface SavedItem {
+  id: string;
+  text: string;
+  date: string;
+}
 
-  const moodTrends = getMoodTrends(7);
+export default function JournalScreen() {
+  const [activeTab, setActiveTab] = useState<Tab>('affirmations');
+  const [gratitudeText, setGratitudeText] = useState('');
+  const [savedAffirmations, setSavedAffirmations] = useState<SavedItem[]>([
+    { id: '1', text: 'I easily overcome challenges while working on build a portfolio of 3 complete projects.', date: '1/10/2025' }
+  ]);
+  const [savedGratitude, setSavedGratitude] = useState<SavedItem[]>([
+    { id: '1', text: '🙏 1. I am grateful for having this beautiful life\n2. I am grateful for having this beautiful house\n3. I am grateful for having this beautiful business\n4. I am grateful for having this healthy body', date: '1/10/2025' }
+  ]);
+  const [savedVisualizations, setSavedVisualizations] = useState<SavedItem[]>([
+    { id: '1', text: 'Imagine yourself sitting in your home office, looking at your computer screen showing your business dashboard. The numbers are clear: $10,000 in monthly recurring revenue...', date: '1/10/2025' }
+  ]);
 
-  const moodLabels = [
-    { value: 1, emoji: '😢', label: 'Terrible' },
-    { value: 2, emoji: '😟', label: 'Bad' },
-    { value: 3, emoji: '😐', label: 'Poor' },
-    { value: 4, emoji: '🙂', label: 'Okay' },
-    { value: 5, emoji: '😊', label: 'Good' },
-    { value: 6, emoji: '😄', label: 'Great' },
-    { value: 7, emoji: '🤩', label: 'Amazing' },
+  const affirmations = [
+    "I am building a successful online business that serves thousands of people",
+    "Every day I take decisive action toward my $10,000 monthly revenue goal",
+    "I attract the right customers who value my products and services",
+    "My business grows stronger and more profitable each month",
+    "I have all the skills and resources needed to achieve my business goals"
   ];
 
-  const energyLabels = [
-    { value: 1, emoji: '😴', label: 'Exhausted' },
-    { value: 2, emoji: '😪', label: 'Very Low' },
-    { value: 3, emoji: '😑', label: 'Low' },
-    { value: 4, emoji: '😐', label: 'Moderate' },
-    { value: 5, emoji: '🙂', label: 'Good' },
-    { value: 6, emoji: '⚡', label: 'High' },
-    { value: 7, emoji: '🚀', label: 'Energized' },
-  ];
+  const visualizationScript = "Imagine yourself sitting in your home office, looking at your computer screen showing your business dashboard. The numbers are clear: $10,000 in monthly recurring revenue...";
 
-  const tagOptions = [
-    { name: 'work', emoji: '💼' },
-    { name: 'family', emoji: '👨‍👩‍👧' },
-    { name: 'health', emoji: '💪' },
-    { name: 'exercise', emoji: '🏃' },
-    { name: 'social', emoji: '👥' },
-    { name: 'stress', emoji: '😰' },
-    { name: 'relaxed', emoji: '😌' },
-    { name: 'productive', emoji: '✅' },
-    { name: 'creative', emoji: '🎨' },
-    { name: 'grateful', emoji: '🙏' },
-  ];
+  const handleSaveAffirmation = (text: string) => {
+    const newItem: SavedItem = {
+      id: Date.now().toString(),
+      text,
+      date: new Date().toLocaleDateString(),
+    };
+    setSavedAffirmations([...savedAffirmations, newItem]);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
 
-  const handleLogMood = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
-    try {
-      await createMoodEntry({
-        mood_score: selectedMood,
-        energy_level: selectedEnergy,
-        notes: notes.trim() || undefined,
-        tags: selectedTags,
-      });
-      
-      setSelectedMood(5);
-      setSelectedEnergy(5);
-      setNotes('');
-      setSelectedTags([]);
-      
+  const handleSaveGratitude = () => {
+    if (gratitudeText.trim()) {
+      const newItem: SavedItem = {
+        id: Date.now().toString(),
+        text: gratitudeText,
+        date: new Date().toLocaleDateString(),
+      };
+      setSavedGratitude([...savedGratitude, newItem]);
+      setGratitudeText('');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Success', 'Mood logged successfully! 🎉');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to log mood');
     }
   };
 
-  const toggleTag = (tag: string) => {
-    Haptics.selectionAsync();
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
-    );
+  const handleSaveVisualization = () => {
+    const newItem: SavedItem = {
+      id: Date.now().toString(),
+      text: visualizationScript,
+      date: new Date().toLocaleDateString(),
+    };
+    setSavedVisualizations([...savedVisualizations, newItem]);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
 
-  const getMoodGradient = (score: number) => {
-    if (score <= 2) return ['#EF4444', '#DC2626'];
-    if (score <= 4) return ['#F59E0B', '#D97706'];
-    if (score <= 5) return ['#EAB308', '#CA8A04'];
-    return ['#22C55E', '#16A34A'];
+  const handleDelete = (id: string, type: 'affirmation' | 'gratitude' | 'visualization') => {
+    if (type === 'affirmation') {
+      setSavedAffirmations(savedAffirmations.filter(item => item.id !== id));
+    } else if (type === 'gratitude') {
+      setSavedGratitude(savedGratitude.filter(item => item.id !== id));
+    } else {
+      setSavedVisualizations(savedVisualizations.filter(item => item.id !== id));
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <View className="flex-1 bg-white">
       {/* Header */}
-      <LinearGradient
-        colors={['#A855F7', '#9333EA']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ paddingHorizontal: 24, paddingTop: 48, paddingBottom: 24 }}
-      >
-        <Text className="text-white text-3xl font-bold mb-2">Mood Tracker 😊</Text>
-        <Text className="text-white/80">Track your emotional wellbeing</Text>
-      </LinearGradient>
+      <View className="px-6 pt-12 pb-4 border-b border-gray-100">
+        <Text className="text-3xl font-bold text-gray-900 mb-2">Journal</Text>
+        <Text className="text-base text-gray-500">Write, record, and manifest your dreams</Text>
+      </View>
 
-      <View className="px-6 pt-6">
-        {/* Mood Trends Card */}
-        <View className="flex-row mb-6 -mt-8">
-          <View className="flex-1 rounded-3xl mr-2 shadow-card overflow-hidden">
-            <LinearGradient
-              colors={getMoodGradient(moodTrends.averageMood)}
-              style={{ padding: 20 }}
-            >
-              <Text className="text-white text-4xl font-bold">{moodTrends.averageMood.toFixed(1)}</Text>
-              <Text className="text-white/80 text-sm mt-1">Avg Mood (7d)</Text>
-            </LinearGradient>
+      {/* Tabs */}
+      <View className="flex-row px-6 py-4 border-b border-gray-100">
+        <TouchableOpacity
+          onPress={() => {
+            setActiveTab('affirmations');
+            Haptics.selectionAsync();
+          }}
+          className={`px-4 py-2 rounded-full mr-2 ${activeTab === 'affirmations' ? 'bg-primary' : 'bg-white'}`}
+        >
+          <View className="flex-row items-center">
+            <Text className="mr-1">✨</Text>
+            <Text className={`font-semibold ${activeTab === 'affirmations' ? 'text-white' : 'text-gray-700'}`}>
+              Affirmations
+            </Text>
           </View>
-
-          <View className="flex-1 rounded-3xl ml-2 shadow-card overflow-hidden">
-            <LinearGradient
-              colors={['#3B82F6', '#2563EB']}
-              style={{ padding: 20 }}
-            >
-              <Text className="text-white text-4xl font-bold">{moodTrends.averageEnergy.toFixed(1)}</Text>
-              <Text className="text-white/80 text-sm mt-1">Avg Energy (7d)</Text>
-            </LinearGradient>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setActiveTab('gratitude');
+            Haptics.selectionAsync();
+          }}
+          className={`px-4 py-2 rounded-full mr-2 ${activeTab === 'gratitude' ? 'bg-primary' : 'bg-white'}`}
+        >
+          <View className="flex-row items-center">
+            <Text className="mr-1">❤️</Text>
+            <Text className={`font-semibold ${activeTab === 'gratitude' ? 'text-white' : 'text-gray-700'}`}>
+              Gratitude
+            </Text>
           </View>
-        </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => {
+            setActiveTab('visualize');
+            Haptics.selectionAsync();
+          }}
+          className={`px-4 py-2 rounded-full ${activeTab === 'visualize' ? 'bg-primary' : 'bg-white'}`}
+        >
+          <View className="flex-row items-center">
+            <Text className="mr-1">👁️</Text>
+            <Text className={`font-semibold ${activeTab === 'visualize' ? 'text-white' : 'text-gray-700'}`}>
+              Visualize
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
 
-        {/* Trend Indicator */}
-        <View className="bg-white rounded-3xl p-5 mb-6 shadow-card">
-          <View className="flex-row items-center justify-between">
-            <Text className="text-gray-900 text-lg font-bold">Weekly Trend</Text>
-            <View className={`px-4 py-2 rounded-full ${
-              moodTrends.trend === 'up' ? 'bg-success-100' :
-              moodTrends.trend === 'down' ? 'bg-red-100' : 'bg-gray-100'
-            }`}>
-              <Text className={`font-semibold ${
-                moodTrends.trend === 'up' ? 'text-success-700' :
-                moodTrends.trend === 'down' ? 'text-red-700' : 'text-gray-700'
-              }`}>
-                {moodTrends.trend === 'up' ? '📈 Improving' :
-                 moodTrends.trend === 'down' ? '📉 Declining' : '➡️ Stable'}
+      <ScrollView className="flex-1 px-6 py-6">
+        {/* Affirmations Tab */}
+        {activeTab === 'affirmations' && (
+          <View>
+            <View className="border-l-4 border-primary pl-4 mb-6">
+              <View className="flex-row items-center mb-3">
+                <Text className="text-xl mr-2">✨</Text>
+                <Text className="text-xl font-bold text-gray-900">Goal-Based Affirmations</Text>
+              </View>
+              <Text className="text-sm text-gray-600 mb-4">
+                Personalized affirmations created from your master goal to help reinforce positive thinking and success mindset.
               </Text>
+              {affirmations.map((affirmation, index) => (
+                <View key={index} className="bg-gray-50 rounded-2xl p-4 mb-3">
+                  <Text className="text-base italic text-gray-900 mb-3">"{affirmation}"</Text>
+                  <TouchableOpacity
+                    onPress={() => handleSaveAffirmation(affirmation)}
+                    className="bg-primary rounded-lg py-2 px-4 self-end"
+                  >
+                    <Text className="text-white font-semibold">+ Save</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
             </View>
-          </View>
-        </View>
 
-        {/* Log New Mood */}
-        <View className="bg-white rounded-3xl p-6 mb-6 shadow-card">
-          <Text className="text-gray-900 text-2xl font-bold mb-6">How are you feeling?</Text>
-          
-          {/* Mood Selection */}
-          <Text className="text-gray-700 text-base font-semibold mb-3">Mood</Text>
-          <View className="flex-row flex-wrap mb-6">
-            {moodLabels.map((mood) => (
-              <TouchableOpacity
-                key={mood.value}
-                activeOpacity={0.7}
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  setSelectedMood(mood.value);
-                }}
-              >
-                {selectedMood === mood.value ? (
-                  <View className="rounded-2xl mr-2 mb-2 overflow-hidden">
-                    <LinearGradient
-                      colors={getMoodGradient(mood.value)}
-                      style={{ paddingHorizontal: 16, paddingVertical: 12 }}
-                    >
-                      <Text className="text-white font-semibold">
-                        {mood.emoji} {mood.label}
-                      </Text>
-                    </LinearGradient>
-                  </View>
-                ) : (
-                  <View className="px-4 py-3 rounded-2xl mr-2 mb-2 bg-gray-100">
-                    <Text className="text-gray-700 font-medium">
-                      {mood.emoji} {mood.label}
-                    </Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Energy Selection */}
-          <Text className="text-gray-700 text-base font-semibold mb-3">Energy Level</Text>
-          <View className="flex-row flex-wrap mb-6">
-            {energyLabels.map((energy) => (
-              <TouchableOpacity
-                key={energy.value}
-                activeOpacity={0.7}
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  setSelectedEnergy(energy.value);
-                }}
-              >
-                {selectedEnergy === energy.value ? (
-                  <View className="rounded-2xl mr-2 mb-2 overflow-hidden">
-                    <LinearGradient
-                      colors={['#3B82F6', '#2563EB']}
-                      style={{ paddingHorizontal: 16, paddingVertical: 12 }}
-                    >
-                      <Text className="text-white font-semibold">
-                        {energy.emoji} {energy.label}
-                      </Text>
-                    </LinearGradient>
-                  </View>
-                ) : (
-                  <View className="px-4 py-3 rounded-2xl mr-2 mb-2 bg-gray-100">
-                    <Text className="text-gray-700 font-medium">
-                      {energy.emoji} {energy.label}
-                    </Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Tags */}
-          <Text className="text-gray-700 text-base font-semibold mb-3">What's influencing you?</Text>
-          <View className="flex-row flex-wrap mb-6">
-            {tagOptions.map((tag) => (
-              <TouchableOpacity
-                key={tag.name}
-                activeOpacity={0.7}
-                className={`px-4 py-2 rounded-full mr-2 mb-2 ${
-                  selectedTags.includes(tag.name) ? 'bg-purple-500' : 'bg-gray-100'
-                }`}
-                onPress={() => toggleTag(tag.name)}
-              >
-                <Text className={`font-medium capitalize ${
-                  selectedTags.includes(tag.name) ? 'text-white' : 'text-gray-700'
-                }`}>
-                  {tag.emoji} {tag.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Notes */}
-          <Text className="text-gray-700 text-base font-semibold mb-2">Notes (optional)</Text>
-          <TextInput
-            className="border-2 border-gray-200 rounded-2xl px-4 py-3 mb-6 text-base"
-            value={notes}
-            onChangeText={setNotes}
-            placeholder="Any thoughts or reflections..."
-            placeholderTextColor="#9CA3AF"
-            multiline
-            numberOfLines={3}
-          />
-
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={handleLogMood}
-          >
-            <View className="rounded-2xl overflow-hidden">
-              <LinearGradient
-                colors={['#A855F7', '#9333EA']}
-                style={{ paddingVertical: 16 }}
-              >
-                <Text className="text-white text-center font-bold text-lg">Log Mood</Text>
-              </LinearGradient>
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-xl font-bold text-gray-900">My Affirmations</Text>
+              <View className="bg-primary/10 w-8 h-8 rounded-full items-center justify-center">
+                <Text className="text-primary font-bold">{savedAffirmations.length}</Text>
+              </View>
             </View>
-          </TouchableOpacity>
-        </View>
+            {savedAffirmations.map((item) => (
+              <View key={item.id} className="bg-white border border-gray-200 rounded-2xl p-4 mb-3">
+                <Text className="text-base text-gray-900 mb-2">"{item.text}"</Text>
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-sm text-gray-500">{item.date}</Text>
+                  <TouchableOpacity onPress={() => handleDelete(item.id, 'affirmation')}>
+                    <Text className="text-xl">🗑️</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
 
-        {/* Recent Entries */}
-        <View className="bg-white rounded-3xl p-6 mb-6 shadow-card">
-          <Text className="text-gray-900 text-xl font-bold mb-4">Recent Entries</Text>
-          {moodEntries.slice(0, 5).length > 0 ? (
-            moodEntries.slice(0, 5).map((entry) => (
-              <View key={entry.id} className="border-b border-gray-100 pb-4 mb-4 last:border-b-0 last:mb-0">
-                <View className="flex-row items-center justify-between mb-2">
-                  <Text className="text-gray-600 font-medium">
-                    {new Date(entry.created_at).toLocaleDateString('en', { 
-                      weekday: 'short', 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
-                  </Text>
-                  <View className="flex-row items-center">
-                    <View className="flex-row items-center mr-4 bg-purple-100 px-3 py-1 rounded-full">
-                      <Text className="text-purple-700 font-bold">{entry.mood_score}</Text>
+        {/* Gratitude Tab */}
+        {activeTab === 'gratitude' && (
+          <View>
+            <View className="border-l-4 border-primary pl-4 mb-6">
+              <View className="flex-row items-center mb-3">
+                <Text className="text-xl mr-2">❤️ 🙏</Text>
+                <Text className="text-xl font-bold text-gray-900">Daily Gratitude Practice</Text>
+              </View>
+              <Text className="text-sm text-gray-600 mb-4">
+                Take a moment to reflect on what you're grateful for today. Gratitude helps shift focus to positive aspects of life.
+              </Text>
+              <TextInput
+                className="bg-gray-50 rounded-2xl p-4 text-base text-gray-900 mb-3"
+                placeholder="I'm grateful for..."
+                placeholderTextColor="#9CA3AF"
+                multiline
+                numberOfLines={4}
+                value={gratitudeText}
+                onChangeText={setGratitudeText}
+              />
+              <TouchableOpacity
+                onPress={handleSaveGratitude}
+                className="bg-gray-200 rounded-lg py-3 items-center"
+              >
+                <View className="flex-row items-center">
+                  <Text className="text-lg mr-2">💾</Text>
+                  <Text className="text-gray-900 font-semibold">Save</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-xl font-bold text-gray-900">☀️ My Gratitude Journal</Text>
+              <View className="bg-primary/10 w-8 h-8 rounded-full items-center justify-center">
+                <Text className="text-primary font-bold">{savedGratitude.length}</Text>
+              </View>
+            </View>
+            {savedGratitude.map((item) => (
+              <View key={item.id} className="bg-white border border-gray-200 rounded-2xl p-4 mb-3">
+                <Text className="text-base text-gray-900 mb-2">{item.text}</Text>
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-sm text-gray-500">{item.date}</Text>
+                  <TouchableOpacity onPress={() => handleDelete(item.id, 'gratitude')}>
+                    <Text className="text-xl">🗑️</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Visualize Tab */}
+        {activeTab === 'visualize' && (
+          <View>
+            <View className="border-l-4 border-primary pl-4 mb-6">
+              <View className="flex-row items-center mb-3">
+                <Text className="text-xl mr-2">🎯</Text>
+                <Text className="text-xl font-bold text-gray-900">Your Goal Visualization</Text>
+              </View>
+              <Text className="text-sm text-gray-600 mb-4">
+                A personalized visualization script created from your master goal. Find a quiet space and listen or read slowly for best results.
+              </Text>
+              <View className="bg-gray-50 rounded-2xl p-4 mb-3">
+                <Text className="text-base italic text-gray-900 mb-4">{visualizationScript}</Text>
+                <View className="flex-row">
+                  <TouchableOpacity className="bg-primary rounded-lg py-3 px-6 flex-1 mr-2">
+                    <View className="flex-row items-center justify-center">
+                      <Text className="text-lg mr-2">▶️</Text>
+                      <Text className="text-white font-semibold">Play</Text>
                     </View>
-                    <View className="flex-row items-center bg-blue-100 px-3 py-1 rounded-full">
-                      <Text className="text-blue-700 font-bold">⚡ {entry.energy_level}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleSaveVisualization}
+                    className="bg-white border-2 border-primary rounded-lg py-3 px-6"
+                  >
+                    <View className="flex-row items-center justify-center">
+                      <Text className="text-lg mr-2">+</Text>
+                      <Text className="text-primary font-semibold">Save</Text>
                     </View>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-xl font-bold text-gray-900">Saved Scripts</Text>
+              <View className="bg-primary/10 w-8 h-8 rounded-full items-center justify-center">
+                <Text className="text-primary font-bold">{savedVisualizations.length}</Text>
+              </View>
+            </View>
+            {savedVisualizations.map((item) => (
+              <View key={item.id} className="bg-white border border-gray-200 rounded-2xl p-4 mb-3">
+                <Text className="text-lg font-bold text-gray-900 mb-2">My Goal Visualization</Text>
+                <Text className="text-base text-gray-900 mb-3 italic" numberOfLines={2}>{item.text}</Text>
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-sm text-gray-500">{item.date}</Text>
+                  <View className="flex-row">
+                    <TouchableOpacity className="bg-primary rounded-lg py-2 px-4 mr-2">
+                      <View className="flex-row items-center">
+                        <Text className="text-base mr-1">▶️</Text>
+                        <Text className="text-white font-semibold">Play</Text>
+                      </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleDelete(item.id, 'visualization')}>
+                      <Text className="text-xl">🗑️</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
-                {entry.tags.length > 0 && (
-                  <View className="flex-row flex-wrap mb-2">
-                    {entry.tags.map((tag, index) => (
-                      <View key={index} className="bg-gray-100 px-3 py-1 rounded-full mr-2 mb-1">
-                        <Text className="text-xs text-gray-700">{tag}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-                {entry.notes && (
-                  <Text className="text-gray-700 text-sm italic">{entry.notes}</Text>
-                )}
               </View>
-            ))
-          ) : (
-            <View className="py-8 items-center">
-              <Text className="text-6xl mb-2">😊</Text>
-              <Text className="text-gray-500 text-center">No mood entries yet</Text>
-              <Text className="text-gray-400 text-sm text-center mt-1">Start tracking your emotional wellbeing</Text>
-            </View>
-          )}
-        </View>
-
-        <View className="h-8" />
-      </View>
-    </ScrollView>
+            ))}
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 }

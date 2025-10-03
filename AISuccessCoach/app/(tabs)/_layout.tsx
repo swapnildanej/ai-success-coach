@@ -32,43 +32,42 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
-          tabBarIcon: () => null, // TODO: Add icons
+          title: 'Home',
+          tabBarIcon: () => <Text>🏠</Text>,
         }}
       />
       <Tabs.Screen
         name="chat"
         options={{
-          title: 'Chat',
-          tabBarIcon: () => null,
-        }}
-      />
-      <Tabs.Screen
-        name="voice"
-        options={{
-          title: 'Voice Coach',
-          tabBarIcon: () => null,
+          title: 'AI Chat',
+          tabBarIcon: () => <Text>💬</Text>,
         }}
       />
       <Tabs.Screen
         name="goals"
         options={{
           title: 'Goals',
-          tabBarIcon: () => null,
+          tabBarIcon: () => <Text>🎯</Text>,
         }}
       />
       <Tabs.Screen
         name="mood"
         options={{
-          title: 'Mood',
-          tabBarIcon: () => null,
+          title: 'Journal',
+          tabBarIcon: () => <Text>📖</Text>,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
-          tabBarIcon: () => null,
+          title: 'Profile',
+          tabBarIcon: () => <Text>👤</Text>,
+        }}
+      />
+      <Tabs.Screen
+        name="voice"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
