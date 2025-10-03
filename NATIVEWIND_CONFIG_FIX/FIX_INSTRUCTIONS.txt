@@ -1,0 +1,79 @@
+========================================
+NATIVEWIND CONFIGURATION FIX
+========================================
+
+YOUR PROBLEM: Tailwind CSS classes are being ignored because the NativeWind Babel plugin is missing!
+
+SOLUTION: Copy these 2 configuration files to your local project.
+
+========================================
+STEP-BY-STEP INSTRUCTIONS:
+========================================
+
+Step 1: DOWNLOAD THESE FILES
+-----------------------------
+From Replit NATIVEWIND_CONFIG_FIX folder, download:
+1. babel.config.js
+2. tailwind.config.js
+
+Step 2: REPLACE YOUR LOCAL FILES
+---------------------------------
+Navigate to: your-local-project/ai-success-coach/AISuccessCoach/
+
+Replace BOTH files:
+- babel.config.js  (THIS IS THE CRITICAL ONE!)
+- tailwind.config.js
+
+Step 3: CLEAR CACHE AND RESTART
+--------------------------------
+cd ai-success-coach/AISuccessCoach
+
+# Clear all caches
+rm -rf node_modules/.cache
+rm -rf .expo
+
+# Restart Metro with clean cache
+npx expo start --clear
+
+Step 4: SCAN QR CODE
+--------------------
+Scan the QR code from terminal with Expo Go app.
+
+========================================
+WHY THIS FIXES THE PROBLEM:
+========================================
+
+The babel.config.js was missing this line:
+  'nativewind/babel',
+
+Without it, ALL Tailwind CSS classes are ignored!
+
+This plugin converts:
+  className="bg-primary rounded-3xl p-6"
+  
+Into actual React Native styles:
+  backgroundColor: '#3B82F6',
+  borderRadius: 24,
+  padding: 24
+
+========================================
+EXPECTED RESULT:
+========================================
+
+After fixing and restarting:
+✅ Blue rounded card for Today's Motivation
+✅ White cards with gray borders
+✅ Proper spacing and padding
+✅ All beautiful styling matching the reference image
+
+========================================
+TROUBLESHOOTING:
+========================================
+
+If it still doesn't work:
+1. Make SURE you replaced babel.config.js
+2. Delete node_modules and run: npm install
+3. Clear all caches: npx expo start --clear
+4. Close and reopen Expo Go app completely
+
+========================================
