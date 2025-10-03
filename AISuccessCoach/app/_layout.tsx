@@ -9,12 +9,16 @@ export default function RootLayout() {
   const { checkAuth } = useAuthStore();
 
   useEffect(() => {
-    // Initialize authentication
-    checkAuth();
-    
-    // Initialize notifications (only on mobile platforms)
-    if (Platform.OS !== 'web') {
-      const initNotifications = async () => {
+    const initializeApp = async () => {
+      try {
+        // Initialize authentication
+        await checkAuth();
+      } catch (error) {
+        console.log('Auth initialization failed:', error);
+      }
+      
+      // Initialize notifications (only on mobile platforms)
+      if (Platform.OS !== 'web') {
         try {
           const permitted = await setupNotifications();
           if (permitted) {
@@ -25,10 +29,10 @@ export default function RootLayout() {
         } catch (error) {
           console.log('Notification setup failed:', error);
         }
-      };
-      
-      initNotifications();
-    }
+      }
+    };
+    
+    initializeApp();
   }, []);
 
   return (
