@@ -19,12 +19,12 @@ args = "AI_Success_Coach_Mobile"
 name = "AI_Success_Coach_Mobile"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd AISuccessCoach && expo start --port 8082"
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd AISuccessCoach && npx expo start --tunnel --port 8082"
 
 [[ports]]
 localPort = 5000
