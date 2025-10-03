@@ -36,7 +36,7 @@ export default function DashboardScreen() {
       <View className="px-6 pt-12 pb-6">
         {/* Greeting */}
         <Text className="text-3xl font-bold text-gray-900 mb-2">
-          {getGreeting()}, {user?.email?.split('@')[0] || 'there'}!
+          {getGreeting()}, there
         </Text>
         <Text className="text-base text-gray-500 mb-6">
           Your manifestation journey starts here
@@ -44,7 +44,7 @@ export default function DashboardScreen() {
 
         {/* Today's Motivation Card */}
         <View className="bg-primary rounded-3xl p-6 mb-4">
-          <Text className="text-white text-lg font-semibold mb-3">💬 Today's Motivation</Text>
+          <Text className="text-white text-lg font-semibold mb-3">❝❝ Today's Motivation</Text>
           <Text className="text-white italic text-base mb-4">
             "Don't be afraid to give up the good to go for the great."
           </Text>
