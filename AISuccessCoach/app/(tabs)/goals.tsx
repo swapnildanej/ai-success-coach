@@ -76,7 +76,7 @@ export default function GoalsScreen() {
         colors={['#3B82F6', '#2563EB']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-6 pt-12 pb-6"
+        style={{ paddingHorizontal: 24, paddingTop: 48, paddingBottom: 24 }}
       >
         <Text className="text-white text-3xl font-bold mb-2">Goals 🎯</Text>
         <Text className="text-white/80">Track your progress</Text>
@@ -85,31 +85,37 @@ export default function GoalsScreen() {
       <ScrollView className="flex-1 px-6 pt-6">
         {/* Stats Overview with Gradients */}
         <View className="flex-row mb-6 -mt-8">
-          <LinearGradient
-            colors={['#3B82F6', '#6366F1']}
-            className="flex-1 p-4 rounded-2xl mr-2 shadow-card"
-          >
-            <Text className="text-white text-3xl font-bold">{goals.filter(g => !g.completed).length}</Text>
-            <Text className="text-white/80 text-sm mt-1">Active</Text>
-          </LinearGradient>
+          <View className="flex-1 rounded-2xl mr-2 shadow-card overflow-hidden">
+            <LinearGradient
+              colors={['#3B82F6', '#6366F1']}
+              style={{ padding: 16 }}
+            >
+              <Text className="text-white text-3xl font-bold">{goals.filter(g => !g.completed).length}</Text>
+              <Text className="text-white/80 text-sm mt-1">Active</Text>
+            </LinearGradient>
+          </View>
 
-          <LinearGradient
-            colors={['#22C55E', '#16A34A']}
-            className="flex-1 p-4 rounded-2xl mx-1 shadow-card"
-          >
-            <Text className="text-white text-3xl font-bold">{goals.filter(g => g.completed).length}</Text>
-            <Text className="text-white/80 text-sm mt-1">Completed</Text>
-          </LinearGradient>
+          <View className="flex-1 rounded-2xl mx-1 shadow-card overflow-hidden">
+            <LinearGradient
+              colors={['#22C55E', '#16A34A']}
+              style={{ padding: 16 }}
+            >
+              <Text className="text-white text-3xl font-bold">{goals.filter(g => g.completed).length}</Text>
+              <Text className="text-white/80 text-sm mt-1">Completed</Text>
+            </LinearGradient>
+          </View>
 
-          <LinearGradient
-            colors={['#F59E0B', '#D97706']}
-            className="flex-1 p-4 rounded-2xl ml-2 shadow-card"
-          >
-            <Text className="text-white text-3xl font-bold">
-              {goals.length > 0 ? Math.round(goals.reduce((sum, g) => sum + g.progress, 0) / goals.length) : 0}%
-            </Text>
-            <Text className="text-white/80 text-sm mt-1">Average</Text>
-          </LinearGradient>
+          <View className="flex-1 rounded-2xl ml-2 shadow-card overflow-hidden">
+            <LinearGradient
+              colors={['#F59E0B', '#D97706']}
+              style={{ padding: 16 }}
+            >
+              <Text className="text-white text-3xl font-bold">
+                {goals.length > 0 ? Math.round(goals.reduce((sum, g) => sum + g.progress, 0) / goals.length) : 0}%
+              </Text>
+              <Text className="text-white/80 text-sm mt-1">Average</Text>
+            </LinearGradient>
+          </View>
         </View>
 
         {/* Goals List */}
@@ -186,12 +192,14 @@ export default function GoalsScreen() {
                     updateProgress(goal.id, Math.min(100, goal.progress + 10));
                   }}
                 >
-                  <LinearGradient
-                    colors={['#3B82F6', '#2563EB']}
-                    className="py-3 px-4 rounded-xl"
-                  >
-                    <Text className="text-white text-center font-semibold">+10%</Text>
-                  </LinearGradient>
+                  <View className="rounded-xl overflow-hidden">
+                    <LinearGradient
+                      colors={['#3B82F6', '#2563EB']}
+                      style={{ paddingVertical: 12, paddingHorizontal: 16 }}
+                    >
+                      <Text className="text-white text-center font-semibold">+10%</Text>
+                    </LinearGradient>
+                  </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -202,12 +210,14 @@ export default function GoalsScreen() {
                     completeGoal(goal.id);
                   }}
                 >
-                  <LinearGradient
-                    colors={['#22C55E', '#16A34A']}
-                    className="py-3 px-4 rounded-xl"
-                  >
-                    <Text className="text-white text-center font-semibold">Complete ✓</Text>
-                  </LinearGradient>
+                  <View className="rounded-xl overflow-hidden">
+                    <LinearGradient
+                      colors={['#22C55E', '#16A34A']}
+                      style={{ paddingVertical: 12, paddingHorizontal: 16 }}
+                    >
+                      <Text className="text-white text-center font-semibold">Complete ✓</Text>
+                    </LinearGradient>
+                  </View>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -245,12 +255,14 @@ export default function GoalsScreen() {
                 setShowCreateModal(true);
               }}
             >
-              <LinearGradient
-                colors={['#3B82F6', '#2563EB']}
-                className="py-4 px-8 rounded-2xl"
-              >
-                <Text className="text-white font-bold text-lg">Create Your First Goal</Text>
-              </LinearGradient>
+              <View className="rounded-2xl overflow-hidden">
+                <LinearGradient
+                  colors={['#3B82F6', '#2563EB']}
+                  style={{ paddingVertical: 16, paddingHorizontal: 32 }}
+                >
+                  <Text className="text-white font-bold text-lg">Create Your First Goal</Text>
+                </LinearGradient>
+              </View>
             </TouchableOpacity>
           </View>
         )}
@@ -266,13 +278,16 @@ export default function GoalsScreen() {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             setShowCreateModal(true);
           }}
+          className="absolute bottom-6 right-6"
         >
-          <LinearGradient
-            colors={['#3B82F6', '#2563EB']}
-            className="absolute bottom-6 right-6 w-16 h-16 rounded-full items-center justify-center shadow-glow"
-          >
-            <Text className="text-white text-3xl">+</Text>
-          </LinearGradient>
+          <View className="w-16 h-16 rounded-full shadow-glow overflow-hidden">
+            <LinearGradient
+              colors={['#3B82F6', '#2563EB']}
+              style={{ width: 64, height: 64, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Text className="text-white text-3xl">+</Text>
+            </LinearGradient>
+          </View>
         </TouchableOpacity>
       )}
 
@@ -281,7 +296,7 @@ export default function GoalsScreen() {
         <View className="flex-1 bg-white">
           <LinearGradient
             colors={['#3B82F6', '#2563EB']}
-            className="px-6 pt-12 pb-4"
+            style={{ paddingHorizontal: 24, paddingTop: 48, paddingBottom: 16 }}
           >
             <View className="flex-row items-center justify-between">
               <TouchableOpacity onPress={() => setShowCreateModal(false)}>

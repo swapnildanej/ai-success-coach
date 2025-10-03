@@ -134,7 +134,7 @@ export default function ChatScreen() {
         colors={['#3B82F6', '#2563EB']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-6 pt-12 pb-6"
+        style={{ paddingHorizontal: 24, paddingTop: 48, paddingBottom: 24 }}
       >
         <View className="flex-row items-center">
           <View className="w-12 h-12 rounded-full bg-white/20 items-center justify-center mr-3">
@@ -167,22 +167,24 @@ export default function ChatScreen() {
               </View>
             )}
             {message.role === 'user' ? (
-              <LinearGradient
-                colors={['#3B82F6', '#6366F1']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                className="max-w-[80%] p-4 rounded-3xl rounded-tr-md"
-              >
-                <Text className="text-white text-base leading-6">
-                  {message.content}
-                </Text>
-                <Text className="text-white/70 text-xs mt-2">
-                  {message.timestamp.toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                  })}
-                </Text>
-              </LinearGradient>
+              <View className="max-w-[80%] rounded-3xl rounded-tr-md overflow-hidden">
+                <LinearGradient
+                  colors={['#3B82F6', '#6366F1']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ padding: 16 }}
+                >
+                  <Text className="text-white text-base leading-6">
+                    {message.content}
+                  </Text>
+                  <Text className="text-white/70 text-xs mt-2">
+                    {message.timestamp.toLocaleTimeString([], { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
+                  </Text>
+                </LinearGradient>
+              </View>
             ) : (
               <View className="max-w-[80%] bg-white p-4 rounded-3xl rounded-tl-md shadow-card">
                 <Text className="text-gray-900 text-base leading-6">
@@ -230,12 +232,14 @@ export default function ChatScreen() {
             className="ml-2"
           >
             {inputText.trim() && !isLoading ? (
-              <LinearGradient
-                colors={['#3B82F6', '#2563EB']}
-                className="w-10 h-10 rounded-full items-center justify-center"
-              >
-                <Text className="text-white text-lg">↑</Text>
-              </LinearGradient>
+              <View className="w-10 h-10 rounded-full overflow-hidden">
+                <LinearGradient
+                  colors={['#3B82F6', '#2563EB']}
+                  style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <Text className="text-white text-lg">↑</Text>
+                </LinearGradient>
+              </View>
             ) : (
               <View className="w-10 h-10 rounded-full bg-gray-300 items-center justify-center">
                 <Text className="text-white text-lg">↑</Text>

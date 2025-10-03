@@ -40,37 +40,39 @@ export default function DashboardScreen() {
   return (
     <ScrollView className="flex-1 bg-background">
       {/* Hero Section with Gradient */}
-      <LinearGradient
-        colors={['#3B82F6', '#2563EB', '#1D4ED8']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-6 pt-14 pb-20 rounded-b-3xl"
-      >
-        <View className="mb-6">
-          <Text className="text-white text-3xl font-bold mb-2">
-            {getGreeting()}! 👋
-          </Text>
-          <Text className="text-white opacity-90 text-base">
-            {user?.email?.split('@')[0] || 'Welcome'}
-          </Text>
-        </View>
+      <View className="rounded-b-3xl overflow-hidden">
+        <LinearGradient
+          colors={['#3B82F6', '#2563EB', '#1D4ED8']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{ paddingHorizontal: 24, paddingTop: 56, paddingBottom: 80 }}
+        >
+          <View className="mb-6">
+            <Text className="text-white text-3xl font-bold mb-2">
+              {getGreeting()}! 👋
+            </Text>
+            <Text className="text-white opacity-90 text-base">
+              {user?.email?.split('@')[0] || 'Welcome'}
+            </Text>
+          </View>
 
-        {/* Quick Stats Cards */}
-        <View className="flex-row justify-between -mb-12">
-          <View className="bg-white/20 backdrop-blur-lg rounded-2xl p-4 flex-1 mr-2">
-            <Text className="text-white text-3xl font-bold">{activeGoals}</Text>
-            <Text className="text-white/80 text-sm mt-1">Active Goals</Text>
+          {/* Quick Stats Cards */}
+          <View className="flex-row justify-between -mb-12">
+            <View className="bg-white/20 backdrop-blur-lg rounded-2xl p-4 flex-1 mr-2">
+              <Text className="text-white text-3xl font-bold">{activeGoals}</Text>
+              <Text className="text-white/80 text-sm mt-1">Active Goals</Text>
+            </View>
+            <View className="bg-white/20 backdrop-blur-lg rounded-2xl p-4 flex-1 mx-1">
+              <Text className="text-white text-3xl font-bold">{completedGoals}</Text>
+              <Text className="text-white/80 text-sm mt-1">Completed</Text>
+            </View>
+            <View className="bg-white/20 backdrop-blur-lg rounded-2xl p-4 flex-1 ml-2">
+              <Text className="text-white text-3xl font-bold">{moodTrends.averageMood.toFixed(1)}</Text>
+              <Text className="text-white/80 text-sm mt-1">Avg Mood</Text>
+            </View>
           </View>
-          <View className="bg-white/20 backdrop-blur-lg rounded-2xl p-4 flex-1 mx-1">
-            <Text className="text-white text-3xl font-bold">{completedGoals}</Text>
-            <Text className="text-white/80 text-sm mt-1">Completed</Text>
-          </View>
-          <View className="bg-white/20 backdrop-blur-lg rounded-2xl p-4 flex-1 ml-2">
-            <Text className="text-white text-3xl font-bold">{moodTrends.averageMood.toFixed(1)}</Text>
-            <Text className="text-white/80 text-sm mt-1">Avg Mood</Text>
-          </View>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
+      </View>
 
       <View className="px-6 mt-8">
         {/* Quick Actions */}
@@ -82,15 +84,17 @@ export default function DashboardScreen() {
               activeOpacity={0.8}
               className="active:scale-95"
             >
-              <LinearGradient
-                colors={['#3B82F6', '#6366F1']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                className="p-5 rounded-2xl shadow-card"
-              >
-                <Text className="text-white text-lg font-semibold">💬 Start AI Chat Session</Text>
-                <Text className="text-white/80 text-sm mt-1">Get personalized coaching advice</Text>
-              </LinearGradient>
+              <View className="rounded-2xl shadow-card overflow-hidden">
+                <LinearGradient
+                  colors={['#3B82F6', '#6366F1']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ padding: 20 }}
+                >
+                  <Text className="text-white text-lg font-semibold">💬 Start AI Chat Session</Text>
+                  <Text className="text-white/80 text-sm mt-1">Get personalized coaching advice</Text>
+                </LinearGradient>
+              </View>
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -98,15 +102,17 @@ export default function DashboardScreen() {
               activeOpacity={0.8}
               className="active:scale-95 mt-3"
             >
-              <LinearGradient
-                colors={['#22C55E', '#16A34A']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                className="p-5 rounded-2xl shadow-card"
-              >
-                <Text className="text-white text-lg font-semibold">😊 Log Your Mood</Text>
-                <Text className="text-white/80 text-sm mt-1">Track how you're feeling today</Text>
-              </LinearGradient>
+              <View className="rounded-2xl shadow-card overflow-hidden">
+                <LinearGradient
+                  colors={['#22C55E', '#16A34A']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={{ padding: 20 }}
+                >
+                  <Text className="text-white text-lg font-semibold">😊 Log Your Mood</Text>
+                  <Text className="text-white/80 text-sm mt-1">Track how you're feeling today</Text>
+                </LinearGradient>
+              </View>
             </TouchableOpacity>
           </View>
         </View>

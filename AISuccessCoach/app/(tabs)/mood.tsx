@@ -96,7 +96,7 @@ export default function MoodScreen() {
         colors={['#A855F7', '#9333EA']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        className="px-6 pt-12 pb-6"
+        style={{ paddingHorizontal: 24, paddingTop: 48, paddingBottom: 24 }}
       >
         <Text className="text-white text-3xl font-bold mb-2">Mood Tracker 😊</Text>
         <Text className="text-white/80">Track your emotional wellbeing</Text>
@@ -105,21 +105,25 @@ export default function MoodScreen() {
       <View className="px-6 pt-6">
         {/* Mood Trends Card */}
         <View className="flex-row mb-6 -mt-8">
-          <LinearGradient
-            colors={getMoodGradient(moodTrends.averageMood)}
-            className="flex-1 p-5 rounded-3xl mr-2 shadow-card"
-          >
-            <Text className="text-white text-4xl font-bold">{moodTrends.averageMood.toFixed(1)}</Text>
-            <Text className="text-white/80 text-sm mt-1">Avg Mood (7d)</Text>
-          </LinearGradient>
+          <View className="flex-1 rounded-3xl mr-2 shadow-card overflow-hidden">
+            <LinearGradient
+              colors={getMoodGradient(moodTrends.averageMood)}
+              style={{ padding: 20 }}
+            >
+              <Text className="text-white text-4xl font-bold">{moodTrends.averageMood.toFixed(1)}</Text>
+              <Text className="text-white/80 text-sm mt-1">Avg Mood (7d)</Text>
+            </LinearGradient>
+          </View>
 
-          <LinearGradient
-            colors={['#3B82F6', '#2563EB']}
-            className="flex-1 p-5 rounded-3xl ml-2 shadow-card"
-          >
-            <Text className="text-white text-4xl font-bold">{moodTrends.averageEnergy.toFixed(1)}</Text>
-            <Text className="text-white/80 text-sm mt-1">Avg Energy (7d)</Text>
-          </LinearGradient>
+          <View className="flex-1 rounded-3xl ml-2 shadow-card overflow-hidden">
+            <LinearGradient
+              colors={['#3B82F6', '#2563EB']}
+              style={{ padding: 20 }}
+            >
+              <Text className="text-white text-4xl font-bold">{moodTrends.averageEnergy.toFixed(1)}</Text>
+              <Text className="text-white/80 text-sm mt-1">Avg Energy (7d)</Text>
+            </LinearGradient>
+          </View>
         </View>
 
         {/* Trend Indicator */}
@@ -158,14 +162,16 @@ export default function MoodScreen() {
                 }}
               >
                 {selectedMood === mood.value ? (
-                  <LinearGradient
-                    colors={getMoodGradient(mood.value)}
-                    className="px-4 py-3 rounded-2xl mr-2 mb-2"
-                  >
-                    <Text className="text-white font-semibold">
-                      {mood.emoji} {mood.label}
-                    </Text>
-                  </LinearGradient>
+                  <View className="rounded-2xl mr-2 mb-2 overflow-hidden">
+                    <LinearGradient
+                      colors={getMoodGradient(mood.value)}
+                      style={{ paddingHorizontal: 16, paddingVertical: 12 }}
+                    >
+                      <Text className="text-white font-semibold">
+                        {mood.emoji} {mood.label}
+                      </Text>
+                    </LinearGradient>
+                  </View>
                 ) : (
                   <View className="px-4 py-3 rounded-2xl mr-2 mb-2 bg-gray-100">
                     <Text className="text-gray-700 font-medium">
@@ -190,14 +196,16 @@ export default function MoodScreen() {
                 }}
               >
                 {selectedEnergy === energy.value ? (
-                  <LinearGradient
-                    colors={['#3B82F6', '#2563EB']}
-                    className="px-4 py-3 rounded-2xl mr-2 mb-2"
-                  >
-                    <Text className="text-white font-semibold">
-                      {energy.emoji} {energy.label}
-                    </Text>
-                  </LinearGradient>
+                  <View className="rounded-2xl mr-2 mb-2 overflow-hidden">
+                    <LinearGradient
+                      colors={['#3B82F6', '#2563EB']}
+                      style={{ paddingHorizontal: 16, paddingVertical: 12 }}
+                    >
+                      <Text className="text-white font-semibold">
+                        {energy.emoji} {energy.label}
+                      </Text>
+                    </LinearGradient>
+                  </View>
                 ) : (
                   <View className="px-4 py-3 rounded-2xl mr-2 mb-2 bg-gray-100">
                     <Text className="text-gray-700 font-medium">
@@ -246,12 +254,14 @@ export default function MoodScreen() {
             activeOpacity={0.8}
             onPress={handleLogMood}
           >
-            <LinearGradient
-              colors={['#A855F7', '#9333EA']}
-              className="rounded-2xl py-4"
-            >
-              <Text className="text-white text-center font-bold text-lg">Log Mood</Text>
-            </LinearGradient>
+            <View className="rounded-2xl overflow-hidden">
+              <LinearGradient
+                colors={['#A855F7', '#9333EA']}
+                style={{ paddingVertical: 16 }}
+              >
+                <Text className="text-white text-center font-bold text-lg">Log Mood</Text>
+              </LinearGradient>
+            </View>
           </TouchableOpacity>
         </View>
 
