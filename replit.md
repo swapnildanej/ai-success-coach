@@ -4,6 +4,18 @@
 
 AI Success Coach is a React Native mobile application built with Expo that provides personalized coaching through AI-powered chat, voice interactions, goal tracking, mood monitoring, and progress analytics. The app helps users achieve their goals by offering motivational support, tracking their emotional well-being, and providing actionable insights through an intelligent coaching interface.
 
+## Recent Changes (October 2025)
+
+**UI/UX Redesign - Minimalist Design System:**
+- Complete redesign to clean, minimalist aesthetic with white backgrounds and simple bordered cards
+- Removed all LinearGradient components in favor of flat design
+- Updated Home screen with greeting, manifestation subtitle, Today's Motivation card (blue), Master Goal card, and Quick Ask AI Coach section
+- Redesigned AI Chat screen with simple empty state and clean message bubbles
+- Rebuilt Goals screen with Master Goal, Small Goals, Roadblocks, and Solutions sections
+- Created Journal screen replacing Mood tracking, featuring Affirmations, Gratitude, and Visualize tabs
+- Updated bottom navigation to 5 tabs: Home (🏠), AI Chat (💬), Goals (🎯), Journal (📔), Profile (👤)
+- Primary color remains #3B82F6 with emphasis on simplicity and user-friendly interface
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
