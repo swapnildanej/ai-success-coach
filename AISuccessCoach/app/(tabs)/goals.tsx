@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert, Dimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import { useGoalsStore } from '../../src/stores/goalsStore';
 import { Goal } from '../../src/types';
 
@@ -24,6 +26,8 @@ export default function GoalsScreen() {
       return;
     }
 
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     try {
       await createGoal({
         ...newGoal,
@@ -43,144 +47,130 @@ export default function GoalsScreen() {
     }
   };
 
-  const getCategoryColor = (category: string) => {
-    const colors = {
-      health: 'bg-green-100 text-green-700',
-      career: 'bg-blue-100 text-blue-700',
-      personal: 'bg-purple-100 text-purple-700',
-      financial: 'bg-yellow-100 text-yellow-700',
-      learning: 'bg-indigo-100 text-indigo-700',
+  const getCategoryEmoji = (category: string) => {
+    const emojis = {
+      health: '💪',
+      career: '💼',
+      personal: '✨',
+      financial: '💰',
+      learning: '📚',
     };
-    return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-700';
+    return emojis[category as keyof typeof emojis] || '🎯';
   };
 
-  const getPriorityColor = (priority: string) => {
-    const colors = {
-      low: 'text-gray-500',
-      medium: 'text-yellow-500',
-      high: 'text-red-500',
+  const getCategoryGradient = (category: string) => {
+    const gradients = {
+      health: ['#22C55E', '#16A34A'],
+      career: ['#3B82F6', '#2563EB'],
+      personal: ['#A855F7', '#9333EA'],
+      financial: ['#F59E0B', '#D97706'],
+      learning: ['#6366F1', '#4F46E5'],
     };
-    return colors[priority as keyof typeof colors] || 'text-gray-500';
+    return gradients[category as keyof typeof gradients] || ['#3B82F6', '#2563EB'];
   };
 
   return (
-    <View className="flex-1 bg-gray-50">
-      <View className="bg-primary px-6 pt-12 pb-4">
-        <Text className="text-white text-xl font-bold">Goals</Text>
-        <Text className="text-primary-100">Track and achieve your objectives</Text>
-      </View>
+    <View className="flex-1 bg-background">
+      {/* Header */}
+      <LinearGradient
+        colors={['#3B82F6', '#2563EB']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="px-6 pt-12 pb-6"
+      >
+        <Text className="text-white text-3xl font-bold mb-2">Goals 🎯</Text>
+        <Text className="text-white/80">Track your progress</Text>
+      </LinearGradient>
 
-      <ScrollView className="flex-1 px-6 pt-4">
-        {/* Stats Overview */}
-        <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">Overview</Text>
-          <View className="flex-row justify-between">
-            <View className="items-center">
-              <Text className="text-2xl font-bold text-primary">{goals.filter(g => !g.completed).length}</Text>
-              <Text className="text-sm text-gray-600">Active</Text>
-            </View>
-            <View className="items-center">
-              <Text className="text-2xl font-bold text-success">{goals.filter(g => g.completed).length}</Text>
-              <Text className="text-sm text-gray-600">Completed</Text>
-            </View>
-            <View className="items-center">
-              <Text className="text-2xl font-bold text-yellow-500">
-                {goals.length > 0 ? Math.round(goals.reduce((sum, g) => sum + g.progress, 0) / goals.length) : 0}%
-              </Text>
-              <Text className="text-sm text-gray-600">Avg Progress</Text>
-            </View>
-          </View>
+      <ScrollView className="flex-1 px-6 pt-6">
+        {/* Stats Overview with Gradients */}
+        <View className="flex-row mb-6 -mt-8">
+          <LinearGradient
+            colors={['#3B82F6', '#6366F1']}
+            className="flex-1 p-4 rounded-2xl mr-2 shadow-card"
+          >
+            <Text className="text-white text-3xl font-bold">{goals.filter(g => !g.completed).length}</Text>
+            <Text className="text-white/80 text-sm mt-1">Active</Text>
+          </LinearGradient>
+
+          <LinearGradient
+            colors={['#22C55E', '#16A34A']}
+            className="flex-1 p-4 rounded-2xl mx-1 shadow-card"
+          >
+            <Text className="text-white text-3xl font-bold">{goals.filter(g => g.completed).length}</Text>
+            <Text className="text-white/80 text-sm mt-1">Completed</Text>
+          </LinearGradient>
+
+          <LinearGradient
+            colors={['#F59E0B', '#D97706']}
+            className="flex-1 p-4 rounded-2xl ml-2 shadow-card"
+          >
+            <Text className="text-white text-3xl font-bold">
+              {goals.length > 0 ? Math.round(goals.reduce((sum, g) => sum + g.progress, 0) / goals.length) : 0}%
+            </Text>
+            <Text className="text-white/80 text-sm mt-1">Average</Text>
+          </LinearGradient>
         </View>
-
-        {/* Progress by Category */}
-        {goals.length > 0 && (
-          <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-            <Text className="text-lg font-semibold text-gray-900 mb-4">Progress by Category</Text>
-            {Object.entries(
-              goals.reduce((acc, goal) => {
-                acc[goal.category] = (acc[goal.category] || 0) + goal.progress;
-                return acc;
-              }, {} as Record<string, number>)
-            ).map(([category, progress]) => (
-              <View key={category} className="mb-3">
-                <View className="flex-row justify-between mb-1">
-                  <Text className="text-sm font-medium text-gray-700 capitalize">{category}</Text>
-                  <Text className="text-sm font-semibold text-gray-900">{Math.round(progress)}%</Text>
-                </View>
-                <View className="w-full bg-gray-200 rounded-full h-2">
-                  <View 
-                    className="h-2 rounded-full bg-primary"
-                    style={{ width: `${Math.min(100, progress)}%` }}
-                  />
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Category Distribution */}
-        {goals.length > 0 && (
-          <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-            <Text className="text-lg font-semibold text-gray-900 mb-4">Goals by Category</Text>
-            {Object.entries(
-              goals.reduce((acc, goal) => {
-                acc[goal.category] = (acc[goal.category] || 0) + 1;
-                return acc;
-              }, {} as Record<string, number>)
-            ).map(([category, count], index) => {
-              const colors = ['bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-red-500', 'bg-purple-500'];
-              const percentage = Math.round((count / goals.length) * 100);
-              return (
-                <View key={category} className="flex-row items-center justify-between py-2">
-                  <View className="flex-row items-center flex-1">
-                    <View className={`w-4 h-4 rounded-full mr-3 ${colors[index % colors.length]}`} />
-                    <Text className="text-sm font-medium text-gray-700 capitalize">{category}</Text>
-                  </View>
-                  <View className="flex-row items-center">
-                    <Text className="text-sm text-gray-600 mr-2">{count} goals</Text>
-                    <Text className="text-sm font-semibold text-gray-900 w-8">{percentage}%</Text>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        )}
 
         {/* Goals List */}
         {goals.map((goal) => (
-          <View key={goal.id} className="bg-white rounded-xl p-6 mb-4 shadow-sm">
-            <View className="flex-row items-start justify-between mb-3">
-              <View className="flex-1">
-                <Text className={`text-lg font-semibold ${goal.completed ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
-                  {goal.title}
-                </Text>
-                {goal.description && (
-                  <Text className="text-gray-600 text-sm mt-1">{goal.description}</Text>
-                )}
-              </View>
-              <View className="ml-3">
-                <Text className={`text-xs font-medium ${getPriorityColor(goal.priority)}`}>
-                  {goal.priority.toUpperCase()}
-                </Text>
+          <View key={goal.id} className="bg-white rounded-3xl p-6 mb-4 shadow-card">
+            <View className="flex-row items-start justify-between mb-4">
+              <View className="flex-1 flex-row items-start">
+                <Text className="text-3xl mr-3">{getCategoryEmoji(goal.category)}</Text>
+                <View className="flex-1">
+                  <Text className={`text-lg font-bold ${goal.completed ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                    {goal.title}
+                  </Text>
+                  {goal.description && (
+                    <Text className="text-gray-600 text-sm mt-1">{goal.description}</Text>
+                  )}
+                  <View className="flex-row items-center mt-2">
+                    <View className={`px-3 py-1 rounded-full mr-2 ${
+                      goal.category === 'health' ? 'bg-success-100' :
+                      goal.category === 'career' ? 'bg-primary-100' :
+                      goal.category === 'personal' ? 'bg-purple-100' :
+                      goal.category === 'financial' ? 'bg-yellow-100' :
+                      'bg-indigo-100'
+                    }`}>
+                      <Text className={`text-xs font-semibold capitalize ${
+                        goal.category === 'health' ? 'text-success-700' :
+                        goal.category === 'career' ? 'text-primary-700' :
+                        goal.category === 'personal' ? 'text-purple-700' :
+                        goal.category === 'financial' ? 'text-yellow-700' :
+                        'text-indigo-700'
+                      }`}>
+                        {goal.category}
+                      </Text>
+                    </View>
+                    {goal.priority === 'high' && (
+                      <View className="px-2 py-1 rounded-full bg-red-100">
+                        <Text className="text-xs font-semibold text-red-700">HIGH</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
               </View>
             </View>
 
-            <View className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-3 ${getCategoryColor(goal.category)} self-start`}>
-              <Text className={`text-xs font-medium ${getCategoryColor(goal.category).split(' ')[1]}`}>
-                {goal.category}
-              </Text>
+            {/* Circular Progress */}
+            <View className="items-center mb-4">
+              <View className="relative">
+                <View className="w-24 h-24 rounded-full bg-gray-200 items-center justify-center">
+                  <Text className="text-2xl font-bold text-gray-900">{goal.progress}%</Text>
+                </View>
+              </View>
             </View>
 
             {/* Progress Bar */}
             <View className="mb-4">
-              <View className="flex-row justify-between mb-2">
-                <Text className="text-sm text-gray-600">Progress</Text>
-                <Text className="text-sm font-semibold text-gray-900">{goal.progress}%</Text>
-              </View>
-              <View className="w-full bg-gray-200 rounded-full h-2">
-                <View 
-                  className={`h-2 rounded-full ${goal.completed ? 'bg-success' : 'bg-primary'}`}
-                  style={{ width: `${goal.progress}%` }}
+              <View className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <LinearGradient
+                  colors={goal.completed ? ['#22C55E', '#16A34A'] : getCategoryGradient(goal.category)}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{ width: `${goal.progress}%`, height: '100%' }}
+                  className="rounded-full"
                 />
               </View>
             </View>
@@ -189,106 +179,171 @@ export default function GoalsScreen() {
             {!goal.completed && (
               <View className="flex-row space-x-2">
                 <TouchableOpacity
-                  className="flex-1 bg-primary-50 py-2 px-3 rounded-lg"
-                  onPress={() => updateProgress(goal.id, Math.min(100, goal.progress + 10))}
+                  activeOpacity={0.8}
+                  className="flex-1"
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                    updateProgress(goal.id, Math.min(100, goal.progress + 10));
+                  }}
                 >
-                  <Text className="text-primary text-center font-semibold text-sm">+10%</Text>
+                  <LinearGradient
+                    colors={['#3B82F6', '#2563EB']}
+                    className="py-3 px-4 rounded-xl"
+                  >
+                    <Text className="text-white text-center font-semibold">+10%</Text>
+                  </LinearGradient>
                 </TouchableOpacity>
+
                 <TouchableOpacity
-                  className="flex-1 bg-success-50 py-2 px-3 rounded-lg"
-                  onPress={() => completeGoal(goal.id)}
+                  activeOpacity={0.8}
+                  className="flex-1 mx-2"
+                  onPress={() => {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    completeGoal(goal.id);
+                  }}
                 >
-                  <Text className="text-success-700 text-center font-semibold text-sm">Complete</Text>
+                  <LinearGradient
+                    colors={['#22C55E', '#16A34A']}
+                    className="py-3 px-4 rounded-xl"
+                  >
+                    <Text className="text-white text-center font-semibold">Complete ✓</Text>
+                  </LinearGradient>
                 </TouchableOpacity>
+
                 <TouchableOpacity
-                  className="bg-red-50 py-2 px-3 rounded-lg"
-                  onPress={() => deleteGoal(goal.id)}
+                  activeOpacity={0.8}
+                  className="bg-red-100 py-3 px-4 rounded-xl"
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                    deleteGoal(goal.id);
+                  }}
                 >
-                  <Text className="text-red-600 text-center font-semibold text-sm">Delete</Text>
+                  <Text className="text-red-600 text-center font-semibold">🗑️</Text>
                 </TouchableOpacity>
+              </View>
+            )}
+
+            {goal.completed && (
+              <View className="bg-success-50 py-3 px-4 rounded-xl">
+                <Text className="text-success-700 text-center font-semibold">✓ Completed!</Text>
               </View>
             )}
           </View>
         ))}
 
         {goals.length === 0 && (
-          <View className="bg-white rounded-xl p-8 shadow-sm items-center">
-            <Text className="text-gray-500 text-center mb-4">
-              No goals yet. Start by creating your first goal!
+          <View className="bg-white rounded-3xl p-12 shadow-card items-center mt-8">
+            <Text className="text-6xl mb-4">🎯</Text>
+            <Text className="text-gray-900 text-xl font-bold mb-2">No goals yet</Text>
+            <Text className="text-gray-500 text-center mb-6">
+              Start your success journey by creating your first goal!
             </Text>
             <TouchableOpacity
-              className="bg-primary py-3 px-6 rounded-lg"
-              onPress={() => setShowCreateModal(true)}
+              activeOpacity={0.8}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                setShowCreateModal(true);
+              }}
             >
-              <Text className="text-white font-semibold">Create Your First Goal</Text>
+              <LinearGradient
+                colors={['#3B82F6', '#2563EB']}
+                className="py-4 px-8 rounded-2xl"
+              >
+                <Text className="text-white font-bold text-lg">Create Your First Goal</Text>
+              </LinearGradient>
             </TouchableOpacity>
           </View>
         )}
+
+        <View className="h-24" />
       </ScrollView>
 
       {/* Floating Action Button */}
       {goals.length > 0 && (
         <TouchableOpacity
-          className="absolute bottom-6 right-6 bg-primary w-14 h-14 rounded-full items-center justify-center shadow-lg"
-          onPress={() => setShowCreateModal(true)}
+          activeOpacity={0.8}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setShowCreateModal(true);
+          }}
         >
-          <Text className="text-white text-2xl">+</Text>
+          <LinearGradient
+            colors={['#3B82F6', '#2563EB']}
+            className="absolute bottom-6 right-6 w-16 h-16 rounded-full items-center justify-center shadow-glow"
+          >
+            <Text className="text-white text-3xl">+</Text>
+          </LinearGradient>
         </TouchableOpacity>
       )}
 
       {/* Create Goal Modal */}
       <Modal visible={showCreateModal} animationType="slide" presentationStyle="pageSheet">
         <View className="flex-1 bg-white">
-          <View className="px-6 pt-12 pb-4 border-b border-gray-200">
+          <LinearGradient
+            colors={['#3B82F6', '#2563EB']}
+            className="px-6 pt-12 pb-4"
+          >
             <View className="flex-row items-center justify-between">
               <TouchableOpacity onPress={() => setShowCreateModal(false)}>
-                <Text className="text-primary text-lg">Cancel</Text>
+                <Text className="text-white text-lg">Cancel</Text>
               </TouchableOpacity>
-              <Text className="text-xl font-bold text-gray-900">New Goal</Text>
+              <Text className="text-xl font-bold text-white">New Goal</Text>
               <TouchableOpacity onPress={handleCreateGoal}>
-                <Text className="text-primary text-lg font-semibold">Save</Text>
+                <Text className="text-white text-lg font-semibold">Save</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </LinearGradient>
 
           <ScrollView className="flex-1 px-6 pt-6">
             <View className="mb-6">
-              <Text className="text-sm font-medium text-gray-700 mb-2">Title *</Text>
+              <Text className="text-sm font-semibold text-gray-700 mb-2">Title *</Text>
               <TextInput
-                className="border border-gray-300 rounded-lg px-4 py-3"
+                className="border-2 border-gray-200 rounded-2xl px-4 py-3 text-base"
                 value={newGoal.title}
                 onChangeText={(text) => setNewGoal(prev => ({ ...prev, title: text }))}
                 placeholder="What do you want to achieve?"
+                placeholderTextColor="#9CA3AF"
               />
             </View>
 
             <View className="mb-6">
-              <Text className="text-sm font-medium text-gray-700 mb-2">Description</Text>
+              <Text className="text-sm font-semibold text-gray-700 mb-2">Description</Text>
               <TextInput
-                className="border border-gray-300 rounded-lg px-4 py-3"
+                className="border-2 border-gray-200 rounded-2xl px-4 py-3 text-base"
                 value={newGoal.description}
                 onChangeText={(text) => setNewGoal(prev => ({ ...prev, description: text }))}
                 placeholder="Add more details about your goal"
+                placeholderTextColor="#9CA3AF"
                 multiline
                 numberOfLines={3}
               />
             </View>
 
             <View className="mb-6">
-              <Text className="text-sm font-medium text-gray-700 mb-2">Category</Text>
+              <Text className="text-sm font-semibold text-gray-700 mb-3">Category</Text>
               <View className="flex-row flex-wrap">
-                {['personal', 'career', 'health', 'financial', 'learning'].map((category) => (
+                {[
+                  { key: 'personal', emoji: '✨' },
+                  { key: 'career', emoji: '💼' },
+                  { key: 'health', emoji: '💪' },
+                  { key: 'financial', emoji: '💰' },
+                  { key: 'learning', emoji: '📚' }
+                ].map(({ key, emoji }) => (
                   <TouchableOpacity
-                    key={category}
-                    className={`px-4 py-2 rounded-full mr-2 mb-2 ${
-                      newGoal.category === category ? 'bg-primary' : 'bg-gray-200'
+                    key={key}
+                    activeOpacity={0.8}
+                    className={`px-5 py-3 rounded-2xl mr-2 mb-2 ${
+                      newGoal.category === key ? 'bg-primary' : 'bg-gray-100'
                     }`}
-                    onPress={() => setNewGoal(prev => ({ ...prev, category: category as Goal['category'] }))}
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      setNewGoal(prev => ({ ...prev, category: key as Goal['category'] }));
+                    }}
                   >
-                    <Text className={`capitalize ${
-                      newGoal.category === category ? 'text-white' : 'text-gray-700'
+                    <Text className={`capitalize font-semibold ${
+                      newGoal.category === key ? 'text-white' : 'text-gray-700'
                     }`}>
-                      {category}
+                      {emoji} {key}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -296,17 +351,21 @@ export default function GoalsScreen() {
             </View>
 
             <View className="mb-6">
-              <Text className="text-sm font-medium text-gray-700 mb-2">Priority</Text>
+              <Text className="text-sm font-semibold text-gray-700 mb-3">Priority</Text>
               <View className="flex-row">
                 {['low', 'medium', 'high'].map((priority) => (
                   <TouchableOpacity
                     key={priority}
-                    className={`px-4 py-2 rounded-full mr-2 ${
-                      newGoal.priority === priority ? 'bg-primary' : 'bg-gray-200'
+                    activeOpacity={0.8}
+                    className={`px-5 py-3 rounded-2xl mr-2 ${
+                      newGoal.priority === priority ? 'bg-primary' : 'bg-gray-100'
                     }`}
-                    onPress={() => setNewGoal(prev => ({ ...prev, priority: priority as Goal['priority'] }))}
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      setNewGoal(prev => ({ ...prev, priority: priority as Goal['priority'] }));
+                    }}
                   >
-                    <Text className={`capitalize ${
+                    <Text className={`capitalize font-semibold ${
                       newGoal.priority === priority ? 'text-white' : 'text-gray-700'
                     }`}>
                       {priority}
@@ -315,6 +374,8 @@ export default function GoalsScreen() {
                 ))}
               </View>
             </View>
+
+            <View className="h-8" />
           </ScrollView>
         </View>
       </Modal>

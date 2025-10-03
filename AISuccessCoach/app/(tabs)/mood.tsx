@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert, Dimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 import { useMoodStore } from '../../src/stores/moodStore';
-import { MoodEntry } from '../../src/types';
 
 export default function MoodScreen() {
   const { moodEntries, loading, error, fetchMoodEntries, createMoodEntry, getMoodTrends } = useMoodStore();
@@ -15,34 +16,43 @@ export default function MoodScreen() {
   }, []);
 
   const moodTrends = getMoodTrends(7);
-  const weeklyTrends = getMoodTrends(30);
 
   const moodLabels = [
-    { value: 1, label: '😢 Terrible', color: 'text-red-600' },
-    { value: 2, label: '😟 Bad', color: 'text-red-500' },
-    { value: 3, label: '😐 Poor', color: 'text-orange-500' },
-    { value: 4, label: '🙂 Okay', color: 'text-yellow-500' },
-    { value: 5, label: '😊 Good', color: 'text-green-400' },
-    { value: 6, label: '😄 Great', color: 'text-green-500' },
-    { value: 7, label: '🤩 Amazing', color: 'text-green-600' },
+    { value: 1, emoji: '😢', label: 'Terrible' },
+    { value: 2, emoji: '😟', label: 'Bad' },
+    { value: 3, emoji: '😐', label: 'Poor' },
+    { value: 4, emoji: '🙂', label: 'Okay' },
+    { value: 5, emoji: '😊', label: 'Good' },
+    { value: 6, emoji: '😄', label: 'Great' },
+    { value: 7, emoji: '🤩', label: 'Amazing' },
   ];
 
   const energyLabels = [
-    { value: 1, label: '😴 Exhausted', color: 'text-red-600' },
-    { value: 2, label: '😪 Very Low', color: 'text-red-500' },
-    { value: 3, label: '😑 Low', color: 'text-orange-500' },
-    { value: 4, label: '😐 Moderate', color: 'text-yellow-500' },
-    { value: 5, label: '🙂 Good', color: 'text-green-400' },
-    { value: 6, label: '⚡ High', color: 'text-green-500' },
-    { value: 7, label: '🚀 Energized', color: 'text-green-600' },
+    { value: 1, emoji: '😴', label: 'Exhausted' },
+    { value: 2, emoji: '😪', label: 'Very Low' },
+    { value: 3, emoji: '😑', label: 'Low' },
+    { value: 4, emoji: '😐', label: 'Moderate' },
+    { value: 5, emoji: '🙂', label: 'Good' },
+    { value: 6, emoji: '⚡', label: 'High' },
+    { value: 7, emoji: '🚀', label: 'Energized' },
   ];
 
   const tagOptions = [
-    'work', 'family', 'health', 'exercise', 'social', 'stress', 'relaxed', 
-    'productive', 'creative', 'grateful', 'anxious', 'excited', 'tired', 'motivated'
+    { name: 'work', emoji: '💼' },
+    { name: 'family', emoji: '👨‍👩‍👧' },
+    { name: 'health', emoji: '💪' },
+    { name: 'exercise', emoji: '🏃' },
+    { name: 'social', emoji: '👥' },
+    { name: 'stress', emoji: '😰' },
+    { name: 'relaxed', emoji: '😌' },
+    { name: 'productive', emoji: '✅' },
+    { name: 'creative', emoji: '🎨' },
+    { name: 'grateful', emoji: '🙏' },
   ];
 
   const handleLogMood = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
     try {
       await createMoodEntry({
         mood_score: selectedMood,
@@ -51,19 +61,20 @@ export default function MoodScreen() {
         tags: selectedTags,
       });
       
-      // Reset form
       setSelectedMood(5);
       setSelectedEnergy(5);
       setNotes('');
       setSelectedTags([]);
       
-      Alert.alert('Success', 'Mood logged successfully!');
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert('Success', 'Mood logged successfully! 🎉');
     } catch (error) {
       Alert.alert('Error', 'Failed to log mood');
     }
   };
 
   const toggleTag = (tag: string) => {
+    Haptics.selectionAsync();
     setSelectedTags(prev => 
       prev.includes(tag) 
         ? prev.filter(t => t !== tag)
@@ -71,203 +82,226 @@ export default function MoodScreen() {
     );
   };
 
-  const getMoodColor = (score: number) => {
-    if (score <= 2) return 'text-red-600';
-    if (score <= 4) return 'text-orange-500';
-    if (score <= 5) return 'text-yellow-500';
-    return 'text-green-500';
+  const getMoodGradient = (score: number) => {
+    if (score <= 2) return ['#EF4444', '#DC2626'];
+    if (score <= 4) return ['#F59E0B', '#D97706'];
+    if (score <= 5) return ['#EAB308', '#CA8A04'];
+    return ['#22C55E', '#16A34A'];
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-50">
-      <View className="bg-primary px-6 pt-12 pb-4">
-        <Text className="text-white text-xl font-bold">Mood Tracker</Text>
-        <Text className="text-primary-100">Log and track your emotional wellbeing</Text>
-      </View>
+    <ScrollView className="flex-1 bg-background">
+      {/* Header */}
+      <LinearGradient
+        colors={['#A855F7', '#9333EA']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="px-6 pt-12 pb-6"
+      >
+        <Text className="text-white text-3xl font-bold mb-2">Mood Tracker 😊</Text>
+        <Text className="text-white/80">Track your emotional wellbeing</Text>
+      </LinearGradient>
 
-      <View className="px-6 pt-4">
-        {/* Mood Trends */}
-        <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">Your Trends</Text>
-          <View className="flex-row justify-between">
-            <View className="items-center">
-              <Text className={`text-2xl font-bold ${getMoodColor(moodTrends.averageMood)}`}>
-                {moodTrends.averageMood.toFixed(1)}
-              </Text>
-              <Text className="text-sm text-gray-600">7-day Avg Mood</Text>
-            </View>
-            <View className="items-center">
-              <Text className={`text-2xl font-bold ${getMoodColor(moodTrends.averageEnergy)}`}>
-                {moodTrends.averageEnergy.toFixed(1)}
-              </Text>
-              <Text className="text-sm text-gray-600">7-day Avg Energy</Text>
-            </View>
-            <View className="items-center">
-              <Text className={`text-lg font-bold ${
-                moodTrends.trend === 'up' ? 'text-green-600' :
-                moodTrends.trend === 'down' ? 'text-red-600' : 'text-gray-600'
+      <View className="px-6 pt-6">
+        {/* Mood Trends Card */}
+        <View className="flex-row mb-6 -mt-8">
+          <LinearGradient
+            colors={getMoodGradient(moodTrends.averageMood)}
+            className="flex-1 p-5 rounded-3xl mr-2 shadow-card"
+          >
+            <Text className="text-white text-4xl font-bold">{moodTrends.averageMood.toFixed(1)}</Text>
+            <Text className="text-white/80 text-sm mt-1">Avg Mood (7d)</Text>
+          </LinearGradient>
+
+          <LinearGradient
+            colors={['#3B82F6', '#2563EB']}
+            className="flex-1 p-5 rounded-3xl ml-2 shadow-card"
+          >
+            <Text className="text-white text-4xl font-bold">{moodTrends.averageEnergy.toFixed(1)}</Text>
+            <Text className="text-white/80 text-sm mt-1">Avg Energy (7d)</Text>
+          </LinearGradient>
+        </View>
+
+        {/* Trend Indicator */}
+        <View className="bg-white rounded-3xl p-5 mb-6 shadow-card">
+          <View className="flex-row items-center justify-between">
+            <Text className="text-gray-900 text-lg font-bold">Weekly Trend</Text>
+            <View className={`px-4 py-2 rounded-full ${
+              moodTrends.trend === 'up' ? 'bg-success-100' :
+              moodTrends.trend === 'down' ? 'bg-red-100' : 'bg-gray-100'
+            }`}>
+              <Text className={`font-semibold ${
+                moodTrends.trend === 'up' ? 'text-success-700' :
+                moodTrends.trend === 'down' ? 'text-red-700' : 'text-gray-700'
               }`}>
-                {moodTrends.trend === 'up' ? '↗️' : moodTrends.trend === 'down' ? '↘️' : '➡️'}
+                {moodTrends.trend === 'up' ? '📈 Improving' :
+                 moodTrends.trend === 'down' ? '📉 Declining' : '➡️ Stable'}
               </Text>
-              <Text className="text-sm text-gray-600">Trend</Text>
             </View>
           </View>
         </View>
 
-        {/* Mood Over Time - Simple List View */}
-        {moodEntries.length > 0 && (
-          <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-            <Text className="text-lg font-semibold text-gray-900 mb-4">Recent Mood & Energy</Text>
-            {moodEntries.slice(-7).reverse().map((entry, index) => (
-              <View key={entry.id} className="flex-row items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                <Text className="text-sm text-gray-600">
-                  {new Date(entry.created_at).toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' })}
-                </Text>
-                <View className="flex-row items-center">
-                  <View className="flex-row items-center mr-4">
-                    <View className="w-2 h-2 bg-primary rounded-full mr-2" />
-                    <Text className="text-sm font-medium">Mood: {entry.mood_score}</Text>
-                  </View>
-                  <View className="flex-row items-center">
-                    <View className="w-2 h-2 bg-success rounded-full mr-2" />
-                    <Text className="text-sm font-medium">Energy: {entry.energy_level}</Text>
-                  </View>
-                </View>
-              </View>
-            ))}
-            <View className="flex-row justify-center mt-4 pt-2 border-t border-gray-100">
-              <View className="flex-row items-center mr-4">
-                <View className="w-3 h-3 bg-primary rounded mr-2" />
-                <Text className="text-xs text-gray-600">Mood</Text>
-              </View>
-              <View className="flex-row items-center">
-                <View className="w-3 h-3 bg-success rounded mr-2" />
-                <Text className="text-xs text-gray-600">Energy</Text>
-              </View>
-            </View>
-          </View>
-        )}
-
         {/* Log New Mood */}
-        <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">How are you feeling right now?</Text>
+        <View className="bg-white rounded-3xl p-6 mb-6 shadow-card">
+          <Text className="text-gray-900 text-2xl font-bold mb-6">How are you feeling?</Text>
           
           {/* Mood Selection */}
-          <Text className="text-sm font-medium text-gray-700 mb-3">Mood</Text>
-          <View className="flex-row flex-wrap mb-4">
+          <Text className="text-gray-700 text-base font-semibold mb-3">Mood</Text>
+          <View className="flex-row flex-wrap mb-6">
             {moodLabels.map((mood) => (
               <TouchableOpacity
                 key={mood.value}
-                className={`px-3 py-2 rounded-lg mr-2 mb-2 ${
-                  selectedMood === mood.value ? 'bg-primary' : 'bg-gray-100'
-                }`}
-                onPress={() => setSelectedMood(mood.value)}
+                activeOpacity={0.7}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setSelectedMood(mood.value);
+                }}
               >
-                <Text className={`text-sm ${
-                  selectedMood === mood.value ? 'text-white' : 'text-gray-700'
-                }`}>
-                  {mood.label}
-                </Text>
+                {selectedMood === mood.value ? (
+                  <LinearGradient
+                    colors={getMoodGradient(mood.value)}
+                    className="px-4 py-3 rounded-2xl mr-2 mb-2"
+                  >
+                    <Text className="text-white font-semibold">
+                      {mood.emoji} {mood.label}
+                    </Text>
+                  </LinearGradient>
+                ) : (
+                  <View className="px-4 py-3 rounded-2xl mr-2 mb-2 bg-gray-100">
+                    <Text className="text-gray-700 font-medium">
+                      {mood.emoji} {mood.label}
+                    </Text>
+                  </View>
+                )}
               </TouchableOpacity>
             ))}
           </View>
 
           {/* Energy Selection */}
-          <Text className="text-sm font-medium text-gray-700 mb-3">Energy Level</Text>
-          <View className="flex-row flex-wrap mb-4">
+          <Text className="text-gray-700 text-base font-semibold mb-3">Energy Level</Text>
+          <View className="flex-row flex-wrap mb-6">
             {energyLabels.map((energy) => (
               <TouchableOpacity
                 key={energy.value}
-                className={`px-3 py-2 rounded-lg mr-2 mb-2 ${
-                  selectedEnergy === energy.value ? 'bg-primary' : 'bg-gray-100'
-                }`}
-                onPress={() => setSelectedEnergy(energy.value)}
+                activeOpacity={0.7}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  setSelectedEnergy(energy.value);
+                }}
               >
-                <Text className={`text-sm ${
-                  selectedEnergy === energy.value ? 'text-white' : 'text-gray-700'
-                }`}>
-                  {energy.label}
-                </Text>
+                {selectedEnergy === energy.value ? (
+                  <LinearGradient
+                    colors={['#3B82F6', '#2563EB']}
+                    className="px-4 py-3 rounded-2xl mr-2 mb-2"
+                  >
+                    <Text className="text-white font-semibold">
+                      {energy.emoji} {energy.label}
+                    </Text>
+                  </LinearGradient>
+                ) : (
+                  <View className="px-4 py-3 rounded-2xl mr-2 mb-2 bg-gray-100">
+                    <Text className="text-gray-700 font-medium">
+                      {energy.emoji} {energy.label}
+                    </Text>
+                  </View>
+                )}
               </TouchableOpacity>
             ))}
           </View>
 
           {/* Tags */}
-          <Text className="text-sm font-medium text-gray-700 mb-3">What's influencing your mood?</Text>
-          <View className="flex-row flex-wrap mb-4">
+          <Text className="text-gray-700 text-base font-semibold mb-3">What's influencing you?</Text>
+          <View className="flex-row flex-wrap mb-6">
             {tagOptions.map((tag) => (
               <TouchableOpacity
-                key={tag}
-                className={`px-3 py-2 rounded-full mr-2 mb-2 ${
-                  selectedTags.includes(tag) ? 'bg-success' : 'bg-gray-200'
+                key={tag.name}
+                activeOpacity={0.7}
+                className={`px-4 py-2 rounded-full mr-2 mb-2 ${
+                  selectedTags.includes(tag.name) ? 'bg-purple-500' : 'bg-gray-100'
                 }`}
-                onPress={() => toggleTag(tag)}
+                onPress={() => toggleTag(tag.name)}
               >
-                <Text className={`text-sm capitalize ${
-                  selectedTags.includes(tag) ? 'text-white' : 'text-gray-700'
+                <Text className={`font-medium capitalize ${
+                  selectedTags.includes(tag.name) ? 'text-white' : 'text-gray-700'
                 }`}>
-                  {tag}
+                  {tag.emoji} {tag.name}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
 
           {/* Notes */}
-          <Text className="text-sm font-medium text-gray-700 mb-2">Notes (optional)</Text>
+          <Text className="text-gray-700 text-base font-semibold mb-2">Notes (optional)</Text>
           <TextInput
-            className="border border-gray-300 rounded-lg px-4 py-3 mb-4"
+            className="border-2 border-gray-200 rounded-2xl px-4 py-3 mb-6 text-base"
             value={notes}
             onChangeText={setNotes}
             placeholder="Any thoughts or reflections..."
+            placeholderTextColor="#9CA3AF"
             multiline
             numberOfLines={3}
           />
 
           <TouchableOpacity
-            className="bg-primary rounded-lg py-4"
+            activeOpacity={0.8}
             onPress={handleLogMood}
           >
-            <Text className="text-white text-center font-semibold text-lg">Log Mood</Text>
+            <LinearGradient
+              colors={['#A855F7', '#9333EA']}
+              className="rounded-2xl py-4"
+            >
+              <Text className="text-white text-center font-bold text-lg">Log Mood</Text>
+            </LinearGradient>
           </TouchableOpacity>
         </View>
 
         {/* Recent Entries */}
-        <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">Recent Entries</Text>
+        <View className="bg-white rounded-3xl p-6 mb-6 shadow-card">
+          <Text className="text-gray-900 text-xl font-bold mb-4">Recent Entries</Text>
           {moodEntries.slice(0, 5).length > 0 ? (
             moodEntries.slice(0, 5).map((entry) => (
-              <View key={entry.id} className="border-b border-gray-100 pb-3 mb-3 last:border-b-0 last:mb-0">
-                <View className="flex-row items-center justify-between mb-1">
-                  <Text className="text-sm text-gray-600">
-                    {new Date(entry.created_at).toLocaleDateString()}
+              <View key={entry.id} className="border-b border-gray-100 pb-4 mb-4 last:border-b-0 last:mb-0">
+                <View className="flex-row items-center justify-between mb-2">
+                  <Text className="text-gray-600 font-medium">
+                    {new Date(entry.created_at).toLocaleDateString('en', { 
+                      weekday: 'short', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
                   </Text>
-                  <View className="flex-row">
-                    <Text className={`text-sm font-medium mr-3 ${getMoodColor(entry.mood_score)}`}>
-                      Mood: {entry.mood_score}/10
-                    </Text>
-                    <Text className={`text-sm font-medium ${getMoodColor(entry.energy_level)}`}>
-                      Energy: {entry.energy_level}/10
-                    </Text>
+                  <View className="flex-row items-center">
+                    <View className="flex-row items-center mr-4 bg-purple-100 px-3 py-1 rounded-full">
+                      <Text className="text-purple-700 font-bold">{entry.mood_score}</Text>
+                    </View>
+                    <View className="flex-row items-center bg-blue-100 px-3 py-1 rounded-full">
+                      <Text className="text-blue-700 font-bold">⚡ {entry.energy_level}</Text>
+                    </View>
                   </View>
                 </View>
                 {entry.tags.length > 0 && (
                   <View className="flex-row flex-wrap mb-2">
                     {entry.tags.map((tag, index) => (
-                      <Text key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded mr-1 mb-1">
-                        {tag}
-                      </Text>
+                      <View key={index} className="bg-gray-100 px-3 py-1 rounded-full mr-2 mb-1">
+                        <Text className="text-xs text-gray-700">{tag}</Text>
+                      </View>
                     ))}
                   </View>
                 )}
                 {entry.notes && (
-                  <Text className="text-sm text-gray-700">{entry.notes}</Text>
+                  <Text className="text-gray-700 text-sm italic">{entry.notes}</Text>
                 )}
               </View>
             ))
           ) : (
-            <Text className="text-gray-500 italic text-center">No mood entries yet</Text>
+            <View className="py-8 items-center">
+              <Text className="text-6xl mb-2">😊</Text>
+              <Text className="text-gray-500 text-center">No mood entries yet</Text>
+              <Text className="text-gray-400 text-sm text-center mt-1">Start tracking your emotional wellbeing</Text>
+            </View>
           )}
         </View>
+
+        <View className="h-8" />
       </View>
     </ScrollView>
   );

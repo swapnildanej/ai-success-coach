@@ -1,10 +1,14 @@
 import React, { useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
 import { useAuthStore } from '../../src/stores/authStore';
 import { useGoalsStore } from '../../src/stores/goalsStore';
 import { useMoodStore } from '../../src/stores/moodStore';
 
 export default function DashboardScreen() {
+  const router = useRouter();
   const { user } = useAuthStore();
   const { goals, fetchGoals } = useGoalsStore();
   const { moodEntries, getMoodTrends } = useMoodStore();
@@ -24,90 +28,152 @@ export default function DashboardScreen() {
     return 'Good evening';
   };
 
-  return (
-    <ScrollView className="flex-1 bg-gray-50">
-      <View className="bg-primary px-6 pt-12 pb-8">
-        <Text className="text-white text-2xl font-bold mb-2">
-          {getGreeting()}, {user?.email?.split('@')[0] || 'Coach'}!
-        </Text>
-        <Text className="text-primary-100">Ready to achieve your goals today?</Text>
-      </View>
+  const handleQuickAction = (action: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (action === 'chat') {
+      router.push('/(tabs)/chat');
+    } else if (action === 'mood') {
+      router.push('/(tabs)/mood');
+    }
+  };
 
-      <View className="px-6 -mt-4">
-        {/* Quick Stats */}
-        <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">Your Progress</Text>
-          <View className="flex-row justify-between">
-            <View className="items-center">
-              <Text className="text-2xl font-bold text-primary">{activeGoals}</Text>
-              <Text className="text-sm text-gray-600">Active Goals</Text>
-            </View>
-            <View className="items-center">
-              <Text className="text-2xl font-bold text-success">{completedGoals}</Text>
-              <Text className="text-sm text-gray-600">Completed</Text>
-            </View>
-            <View className="items-center">
-              <Text className="text-2xl font-bold text-yellow-500">{moodTrends.averageMood.toFixed(1)}</Text>
-              <Text className="text-sm text-gray-600">Avg Mood</Text>
-            </View>
+  return (
+    <ScrollView className="flex-1 bg-background">
+      {/* Hero Section with Gradient */}
+      <LinearGradient
+        colors={['#3B82F6', '#2563EB', '#1D4ED8']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="px-6 pt-14 pb-20 rounded-b-3xl"
+      >
+        <View className="mb-6">
+          <Text className="text-white text-3xl font-bold mb-2">
+            {getGreeting()}! 👋
+          </Text>
+          <Text className="text-white opacity-90 text-base">
+            {user?.email?.split('@')[0] || 'Welcome'}
+          </Text>
+        </View>
+
+        {/* Quick Stats Cards */}
+        <View className="flex-row justify-between -mb-12">
+          <View className="bg-white/20 backdrop-blur-lg rounded-2xl p-4 flex-1 mr-2">
+            <Text className="text-white text-3xl font-bold">{activeGoals}</Text>
+            <Text className="text-white/80 text-sm mt-1">Active Goals</Text>
+          </View>
+          <View className="bg-white/20 backdrop-blur-lg rounded-2xl p-4 flex-1 mx-1">
+            <Text className="text-white text-3xl font-bold">{completedGoals}</Text>
+            <Text className="text-white/80 text-sm mt-1">Completed</Text>
+          </View>
+          <View className="bg-white/20 backdrop-blur-lg rounded-2xl p-4 flex-1 ml-2">
+            <Text className="text-white text-3xl font-bold">{moodTrends.averageMood.toFixed(1)}</Text>
+            <Text className="text-white/80 text-sm mt-1">Avg Mood</Text>
+          </View>
+        </View>
+      </LinearGradient>
+
+      <View className="px-6 mt-8">
+        {/* Quick Actions */}
+        <View className="mb-6">
+          <Text className="text-gray-900 text-xl font-bold mb-4">Quick Actions</Text>
+          <View className="space-y-3">
+            <TouchableOpacity 
+              onPress={() => handleQuickAction('chat')}
+              activeOpacity={0.8}
+              className="active:scale-95"
+            >
+              <LinearGradient
+                colors={['#3B82F6', '#6366F1']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="p-5 rounded-2xl shadow-card"
+              >
+                <Text className="text-white text-lg font-semibold">💬 Start AI Chat Session</Text>
+                <Text className="text-white/80 text-sm mt-1">Get personalized coaching advice</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              onPress={() => handleQuickAction('mood')}
+              activeOpacity={0.8}
+              className="active:scale-95 mt-3"
+            >
+              <LinearGradient
+                colors={['#22C55E', '#16A34A']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="p-5 rounded-2xl shadow-card"
+              >
+                <Text className="text-white text-lg font-semibold">😊 Log Your Mood</Text>
+                <Text className="text-white/80 text-sm mt-1">Track how you're feeling today</Text>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
         </View>
 
         {/* Recent Goals */}
-        <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">Recent Goals</Text>
+        <View className="bg-white rounded-3xl p-6 mb-6 shadow-card">
+          <Text className="text-gray-900 text-xl font-bold mb-4">Recent Goals</Text>
           {goals.slice(0, 3).length > 0 ? (
-            goals.slice(0, 3).map((goal) => (
-              <View key={goal.id} className="flex-row items-center mb-3 last:mb-0">
-                <View className={`w-3 h-3 rounded-full mr-3 ${goal.completed ? 'bg-success' : 'bg-primary'}`} />
-                <View className="flex-1">
-                  <Text className="text-gray-900 font-medium">{goal.title}</Text>
-                  <Text className="text-sm text-gray-600">{goal.progress}% complete</Text>
+            <View className="space-y-4">
+              {goals.slice(0, 3).map((goal, index) => (
+                <View key={goal.id} className="flex-row items-center">
+                  <View className="flex-1">
+                    <View className="flex-row items-center mb-2">
+                      {goal.completed ? (
+                        <View className="w-6 h-6 rounded-full bg-success items-center justify-center mr-3">
+                          <Text className="text-white text-xs">✓</Text>
+                        </View>
+                      ) : (
+                        <View className="w-6 h-6 rounded-full bg-primary-100 border-2 border-primary mr-3" />
+                      )}
+                      <Text className="text-gray-900 font-semibold flex-1">{goal.title}</Text>
+                    </View>
+                    {/* Progress Bar */}
+                    <View className="ml-9 bg-gray-200 h-2 rounded-full overflow-hidden">
+                      <View 
+                        className={`h-full ${goal.completed ? 'bg-success' : 'bg-primary'}`}
+                        style={{ width: `${goal.progress}%` }}
+                      />
+                    </View>
+                    <Text className="ml-9 text-sm text-gray-500 mt-1">{goal.progress}% complete</Text>
+                  </View>
                 </View>
-              </View>
-            ))
+              ))}
+            </View>
           ) : (
-            <Text className="text-gray-500 italic">No goals yet. Let's create your first goal!</Text>
+            <View className="py-8 items-center">
+              <Text className="text-6xl mb-2">🎯</Text>
+              <Text className="text-gray-500 text-center">No goals yet. Let's create your first goal!</Text>
+            </View>
           )}
         </View>
 
-        {/* Quick Actions */}
-        <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</Text>
-          <View className="space-y-3">
-            <TouchableOpacity className="bg-primary-50 p-4 rounded-lg">
-              <Text className="text-primary font-semibold">Start AI Chat Session</Text>
-              <Text className="text-sm text-gray-600 mt-1">Get personalized coaching advice</Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="bg-success-50 p-4 rounded-lg">
-              <Text className="text-success-700 font-semibold">Log Your Mood</Text>
-              <Text className="text-sm text-gray-600 mt-1">Track how you're feeling today</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
         {/* Mood Trend */}
-        <View className="bg-white rounded-xl p-6 mb-6 shadow-sm">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">Weekly Mood Trend</Text>
+        <View className="bg-white rounded-3xl p-6 mb-6 shadow-card">
+          <Text className="text-gray-900 text-xl font-bold mb-4">Weekly Mood Trend</Text>
           <View className="flex-row items-center justify-between">
             <View>
-              <Text className="text-2xl font-bold text-gray-900">{moodTrends.averageMood.toFixed(1)}/10</Text>
-              <Text className="text-sm text-gray-600">Average Mood</Text>
+              <Text className="text-4xl font-bold text-gray-900">{moodTrends.averageMood.toFixed(1)}</Text>
+              <Text className="text-sm text-gray-500 mt-1">Average Mood</Text>
             </View>
-            <View className={`px-3 py-1 rounded-full ${
+            <View className={`px-4 py-2 rounded-full ${
               moodTrends.trend === 'up' ? 'bg-success-100' :
               moodTrends.trend === 'down' ? 'bg-red-100' : 'bg-gray-100'
             }`}>
-              <Text className={`text-sm font-medium ${
+              <Text className={`text-base font-semibold ${
                 moodTrends.trend === 'up' ? 'text-success-700' :
                 moodTrends.trend === 'down' ? 'text-red-700' : 'text-gray-700'
               }`}>
-                {moodTrends.trend === 'up' ? '↗️ Improving' :
-                 moodTrends.trend === 'down' ? '↘️ Needs attention' : '➡️ Stable'}
+                {moodTrends.trend === 'up' ? '📈 Improving' :
+                 moodTrends.trend === 'down' ? '📉 Needs attention' : '➡️ Stable'}
               </Text>
             </View>
           </View>
         </View>
+
+        {/* Bottom spacing */}
+        <View className="h-8" />
       </View>
     </ScrollView>
   );

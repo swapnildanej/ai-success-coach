@@ -13,9 +13,14 @@
     "babel-plugin-transform-import-meta": "^2.3.3",
     "expo-av": "^16.0.7",
     "expo-haptics": "^15.0.7",
+    "expo-linear-gradient": "^15.0.7",
     "expo-notifications": "^0.32.11",
     "expo-speech": "^14.0.7",
     "openai": "^5.23.1",
     "react-native-svg": "^15.13.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.10",
+    "typescript": "~5.9.2"
   }
 }
