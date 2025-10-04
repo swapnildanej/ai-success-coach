@@ -1,0 +1,75 @@
+========================================
+FINAL COMPLETE SOLUTION - NativeWind v4
+========================================
+
+PROBLEM FOUND:
+1. babel.config.js had NativeWind in wrong place (plugins instead of presets)
+2. app/_layout.tsx was missing the CSS import
+
+========================================
+FIX #1: Update babel.config.js
+========================================
+
+Location: C:\Users\Mahavir\ai-success-coach\AISuccessCoach\babel.config.js
+
+Replace with:
+
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: [
+      'babel-preset-expo',
+      'nativewind/babel'
+    ]
+  };
+};
+
+KEY: NativeWind must be in PRESETS array (not plugins)!
+
+========================================
+FIX #2: Update app/_layout.tsx
+========================================
+
+Location: C:\Users\Mahavir\ai-success-coach\AISuccessCoach\app\_layout.tsx
+
+Add this import at the VERY TOP (line 1):
+
+import '../src/styles/global.css';
+
+Then the rest of your imports...
+
+========================================
+FIX #3: Clear Cache & Restart
+========================================
+
+cd C:\Users\Mahavir\ai-success-coach\AISuccessCoach
+
+# Delete caches
+rmdir /s /q .expo
+rmdir /s /q node_modules\.cache
+
+# Restart Metro
+npx expo start --clear
+
+========================================
+EXPECTED RESULT:
+========================================
+
+After these fixes:
+✅ No Babel errors
+✅ Blue rounded Today's Motivation card
+✅ White bordered Master Goal card
+✅ Proper spacing, padding, shadows
+✅ All Tailwind CSS classes working
+✅ Beautiful minimalist UI!
+
+========================================
+WHY THIS WORKS:
+========================================
+
+1. NativeWind v4 requires being in presets[] not plugins[]
+2. global.css import loads Tailwind base styles
+3. Without the CSS import, NativeWind can't apply styles
+4. These two fixes together make NativeWind v4 work properly
+
+========================================
