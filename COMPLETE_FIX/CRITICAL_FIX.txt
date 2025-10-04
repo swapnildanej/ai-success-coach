@@ -1,0 +1,36 @@
+========================================
+CRITICAL: EXACT FILE CONTENT NEEDED
+========================================
+
+YOUR LOCAL babel.config.js MUST LOOK EXACTLY LIKE THIS:
+
+Copy and paste this EXACTLY:
+
+========================================
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: ['babel-preset-expo'],
+    plugins: [
+      'nativewind/babel',
+      'babel-plugin-transform-import-meta'
+    ],
+  };
+};
+========================================
+
+LOCATION: 
+C:\Users\Mahavir\ai-success-coach\AISuccessCoach\babel.config.js
+
+CRITICAL POINTS:
+1. NO square brackets around 'babel-plugin-transform-import-meta'
+2. Just plain string: 'babel-plugin-transform-import-meta'
+3. NOT: ['babel-plugin-transform-import-meta']
+
+AFTER FIXING:
+1. Save the file
+2. Stop Metro (Ctrl+C)
+3. Run: npx expo start --clear
+4. Scan QR code
+
+========================================

@@ -1,11 +1,10 @@
 module.exports = function (api) {
-  api.cache(false);
-  
+  api.cache(true);
   return {
     presets: ['babel-preset-expo'],
     plugins: [
       'nativewind/babel',
-      ['babel-plugin-transform-import-meta']
+      'babel-plugin-transform-import-meta'
     ],
   };
 };
