@@ -1,0 +1,95 @@
+========================================
+COMPLETE SOLUTION: StyleSheet Instead of NativeWind
+========================================
+
+GOOD NEWS: We've abandoned NativeWind completely and switched to React Native's built-in StyleSheet!
+This is MORE RELIABLE and works perfectly without any compatibility issues.
+
+========================================
+STEP 1: Pull Latest Code from GitHub
+========================================
+
+Since you cloned from GitHub, pull the latest changes:
+
+cd C:\Users\Mahavir\ai-success-coach
+git pull origin main
+
+========================================
+STEP 2: Update babel.config.js
+========================================
+
+Your local: C:\Users\Mahavir\ai-success-coach\AISuccessCoach\babel.config.js
+
+Should contain ONLY this:
+
+module.exports = function (api) {
+  api.cache(true);
+  return {
+    presets: ['babel-preset-expo']
+  };
+};
+
+(Remove ALL NativeWind references!)
+
+========================================
+STEP 3: Clean Install
+========================================
+
+cd C:\Users\Mahavir\ai-success-coach\AISuccessCoach
+
+# Delete caches and node_modules
+rmdir /s /q .expo
+rmdir /s /q node_modules\.cache
+rmdir /s /q node_modules
+
+# Fresh install
+npm install
+
+# Start clean
+npx expo start --clear
+
+========================================
+WHAT WE CHANGED:
+========================================
+
+✅ Removed NativeWind completely (no more Babel errors!)
+✅ Created theme.ts with colors, radius, shadow
+✅ Created Card, SectionHeader, ListItem components
+✅ Converted Home screen to use StyleSheet.create()
+✅ Uses native React Native styling (100% reliable!)
+
+========================================
+EXPECTED RESULT:
+========================================
+
+You'll see:
+✅ Beautiful blue Today's Motivation card
+✅ White bordered Master Goal card  
+✅ Proper rounded corners (borderRadius: 18)
+✅ Clean spacing and padding
+✅ Exactly matching the reference design!
+
+========================================
+WHY THIS IS BETTER:
+========================================
+
+1. NO NativeWind compatibility issues
+2. NO Babel plugin errors
+3. Works on ALL Expo versions
+4. Faster compilation
+5. Standard React Native approach
+
+========================================
+IF GIT PULL DOESN'T WORK:
+========================================
+
+You can manually copy these NEW files from Replit:
+
+1. AISuccessCoach/src/theme.ts (NEW)
+2. AISuccessCoach/src/components/Card.tsx (NEW)
+3. AISuccessCoach/src/components/SectionHeader.tsx (NEW)
+4. AISuccessCoach/src/components/ListItem.tsx (NEW)
+5. AISuccessCoach/app/(tabs)/index.tsx (UPDATED)
+6. AISuccessCoach/babel.config.js (UPDATED - simplified)
+
+========================================
