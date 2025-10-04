@@ -1,0 +1,28 @@
+import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import HomeScreen from "../screens/HomeScreen";
+import ChatScreen from "../screens/ChatScreen";
+import GoalsScreen from "../screens/GoalsScreen";
+import JournalScreen from "../screens/JournalScreen";
+import ProfileScreen from "../screens/ProfileScreen";
+import { colors } from "../theme";
+import { Text } from "react-native";
+
+const Tab = createBottomTabNavigator();
+export default function BottomTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: colors.primary,
+        tabBarStyle: { height: 64, paddingBottom: 10, paddingTop: 8 },
+      }}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarIcon: ({ color }) => <Text style={{ color }}>🏠</Text> }} />
+      <Tab.Screen name="AI Chat" component={ChatScreen} options={{ tabBarIcon: ({ color }) => <Text style={{ color }}>💬</Text> }} />
+      <Tab.Screen name="Goals" component={GoalsScreen} options={{ tabBarIcon: ({ color }) => <Text style={{ color }}>🎯</Text> }} />
+      <Tab.Screen name="Journal" component={JournalScreen} options={{ tabBarIcon: ({ color }) => <Text style={{ color }}>📖</Text> }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ tabBarIcon: ({ color }) => <Text style={{ color }}>👤</Text> }} />
+    </Tab.Navigator>
+  );
+}

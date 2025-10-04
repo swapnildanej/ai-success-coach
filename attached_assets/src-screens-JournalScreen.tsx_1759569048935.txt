@@ -1,0 +1,59 @@
+import React, { useState } from "react";
+import { ScrollView, Text, StyleSheet, TouchableOpacity, TextInput, View } from "react-native";
+import { colors } from "../theme";
+import Card from "../components/Card";
+import * as Speech from "expo-speech";
+
+export default function JournalScreen(){
+  const aff = [
+    "I am building a successful online business that serves thousands of people",
+    "Every day I take decisive action toward my $10,000 monthly revenue goal",
+    "I attract the right customers who value my products and services",
+    "My business grows stronger and more profitable each month",
+    "I have all the skills and resources needed to achieve my business goals"
+  ];
+  const [mine,setMine]=useState<string[]>([]);
+  const [grat,setGrat]=useState(""); const [saved,setSaved]=useState<string[]>([]);
+
+  return (
+    <ScrollView style={{flex:1,backgroundColor:colors.bg}} contentContainerStyle={{padding:16}}>
+      <Text style={styles.title}>Journal</Text>
+      <Text style={styles.sub}>Write, record, and manifest your dreams</Text>
+
+      <Card>
+        <Text style={styles.h2}>✨ Goal-Based Affirmations</Text>
+        {aff.map((a,i)=>(
+          <View key={i} style={{marginBottom:12}}>
+            <Text style={styles.italic}>"{a}"</Text>
+            <TouchableOpacity onPress={()=>setMine([a,...mine])} style={styles.btn}><Text style={{color:"white"}}>+ Save</Text></TouchableOpacity>
+          </View>
+        ))}
+        <Text style={styles.h3}>My Affirmations</Text>
+        {mine.map((a,i)=>(<View key={i} style={styles.saved}><Text>"{a}"</Text></View>))}
+      </Card>
+
+      <Card>
+        <Text style={styles.h2}>🧘 Your Goal Visualization</Text>
+        <TouchableOpacity onPress={()=>Speech.speak("Imagine yourself... $10,000 in monthly revenue")} style={styles.btn}><Text style={{color:"white"}}>▶ Play</Text></TouchableOpacity>
+      </Card>
+
+      <Card>
+        <Text style={styles.h2}>💙 Daily Gratitude Practice</Text>
+        <TextInput placeholder="I'm grateful for…" value={grat} onChangeText={setGrat} style={styles.input}/>
+        <TouchableOpacity onPress={()=>{ if(grat.trim()) { setSaved([grat.trim(),...saved]); setGrat(""); }}} style={styles.btn}><Text style={{color:"white"}}>Save</Text></TouchableOpacity>
+        <Text style={styles.h3}>My Gratitude Journal</Text>
+        {saved.map((g,i)=>(<View key={i} style={styles.saved}><Text>"{g}"</Text></View>))}
+      </Card>
+    </ScrollView>
+  );
+}
+const styles = StyleSheet.create({
+  title:{fontSize:28,fontWeight:"800",color:colors.text},
+  sub:{fontSize:15,color:colors.subtext,marginBottom:10},
+  h2:{fontSize:18,fontWeight:"700",marginBottom:8,color:colors.text},
+  h3:{fontSize:16,fontWeight:"700",marginTop:10,marginBottom:8,color:colors.text},
+  italic:{fontStyle:"italic",fontSize:16,marginBottom:8},
+  btn:{backgroundColor:colors.primary, alignSelf:"flex-start", paddingHorizontal:16, paddingVertical:10, borderRadius:12},
+  input:{backgroundColor:"#F3F4F6", borderRadius:14, padding:12, marginVertical:10},
+  saved:{backgroundColor:"#F9FAFB", padding:12, borderRadius:12, marginBottom:8}
+});

@@ -1,0 +1,45 @@
+import React, { useEffect, useState } from "react";
+import { ScrollView, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { colors } from "../theme";
+import Card from "../components/Card";
+import * as Speech from "expo-speech";
+
+export default function HomeScreen() {
+  const [goal, setGoal] = useState("I want to build a business and become financially free at age 35");
+  const [ask, setAsk] = useState("");
+  const quote = `Don't be afraid to give up the good to go for the great.`;
+
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={{ padding: 16 }}>
+      <Text style={styles.h1}>Good afternoon, there</Text>
+      <Text style={styles.sub}>Your manifestation journey starts here</Text>
+
+      <Card>
+        <Text style={{ color: "#E6EEFF" }}>💬 Today's Motivation</Text>
+        <Text style={styles.quote}>"{quote}"</Text>
+        <Text style={{ color: "#E6EEFF", marginTop: 6 }}>— John D. Rockefeller{"\n"}Business Magnate</Text>
+        <TouchableOpacity onPress={() => Speech.speak(quote)} style={styles.play}><Text style={{ color: "white" }}>▶ Play</Text></TouchableOpacity>
+      </Card>
+
+      <Card>
+        <Text style={styles.section}>🟢 Master Goal</Text>
+        <Text style={styles.goal}>{goal}</Text>
+      </Card>
+
+      <Card>
+        <Text style={styles.section}>💬 Quick Ask AI Coach</Text>
+        <TextInput placeholder="Ask about goals, habits, motivation…" value={ask} onChangeText={setAsk} style={styles.input} />
+        <Text style={{ color: colors.subtext, textAlign: "center" }}>Ask about achieving your goals, building habits, or staying motivated</Text>
+      </Card>
+    </ScrollView>
+  );
+}
+const styles = StyleSheet.create({
+  h1: { fontSize: 28, fontWeight: "800", color: colors.text, marginTop: 8 },
+  sub: { fontSize: 15, color: colors.subtext, marginBottom: 12 },
+  quote: { fontSize: 18, color: "white", marginTop: 8 },
+  section: { fontSize: 16, fontWeight: "700", color: colors.text, marginBottom: 6 },
+  goal: { fontSize: 18, color: colors.text },
+  input: { backgroundColor: "#F3F4F6", borderRadius: 14, padding: 14, marginVertical: 12 },
+  play: { backgroundColor: colors.primary, alignSelf: "flex-start", marginTop: 12, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 },
+});

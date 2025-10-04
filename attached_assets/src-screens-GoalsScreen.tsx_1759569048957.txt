@@ -1,0 +1,52 @@
+import React, { useEffect, useState } from "react";
+import { ScrollView, Text, StyleSheet } from "react-native";
+import { colors } from "../theme";
+import Card from "../components/Card";
+import SectionHeader from "../components/SectionHeader";
+import ListItem from "../components/ListItem";
+
+export default function GoalsScreen() {
+  const [smalls] = useState([
+    "Launch my first product within 3 months",
+    "Build an email list of 1000 subscribers",
+    "Create 50 pieces of valuable content",
+    "Establish partnerships with 5 industry leaders",
+  ]);
+  const [blocks] = useState([
+    "Limited technical skills for website development",
+    "Lack of initial capital for marketing",
+    "Time management with current job",
+  ]);
+  const [solutions] = useState([
+    "Take online courses and practice coding daily",
+    "Start with free marketing strategies and social media",
+    "Wake up 2 hours earlier to work on business",
+    "Focus on unique value proposition and niche market",
+  ]);
+
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: colors.bg }} contentContainerStyle={{ padding: 16 }}>
+      <Text style={styles.title}>Goal Planning</Text>
+      <Text style={styles.sub}>Plan your success step by step</Text>
+
+      <Card>
+        <SectionHeader title="🎯 Small Goals" />
+        {smalls.map((t, i) => <ListItem key={i} text={t} />)}
+      </Card>
+
+      <Card>
+        <SectionHeader title="⚠️ Possible Roadblocks" />
+        {blocks.map((t, i) => <ListItem key={i} text={t} />)}
+      </Card>
+
+      <Card>
+        <SectionHeader title="💡 Possible Solutions" />
+        {solutions.map((t, i) => <ListItem key={i} text={t} />)}
+      </Card>
+    </ScrollView>
+  );
+}
+const styles = StyleSheet.create({
+  title: { fontSize: 28, fontWeight: "800", color: colors.text },
+  sub: { fontSize: 15, color: colors.subtext, marginBottom: 10 },
+});

@@ -1,0 +1,56 @@
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import { colors } from "../theme";
+import Card from "../components/Card";
+
+export default function ChatScreen(){
+  const [input,setInput]=useState("");
+  const [msgs,setMsgs]=useState<{role:"user"|"bot";text:string}[]>([]);
+
+  const send=()=>{
+    if(!input.trim()) return;
+    const q=input.trim(); setInput(""); setMsgs(m=>[...m,{role:"user",text:q}]);
+    // TODO: create.xyz backend call; सध्या dummy
+    const a="Absolutely! Firstly, set clear, specific, and measurable goals…";
+    setMsgs(m=>[...m,{role:"bot",text:a}]);
+  };
+
+  return (
+    <View style={{flex:1,backgroundColor:colors.bg}}>
+      <ScrollView contentContainerStyle={{padding:16}}>
+        <Text style={styles.title}>Chat</Text>
+        <Text style={styles.sub}>Chat with your AI Success Coach</Text>
+
+        <Card>
+          <Text style={{fontWeight:"700",fontSize:18,marginBottom:8}}>Start a conversation</Text>
+          <Text style={{color:colors.subtext,marginBottom:12}}>Ask me about goals, habits, mindset…</Text>
+          <TouchableOpacity onPress={()=>setInput("How can I set and achieve my goals effectively?")} style={styles.btn}>
+            <Text style={{color:"white"}}>Ask about goal setting</Text>
+          </TouchableOpacity>
+        </Card>
+
+        {msgs.map((m,i)=>(
+          <View key={i} style={[styles.bubble, m.role==="user"?styles.me:styles.bot]}>
+            <Text style={{color:m.role==="user"?"white":colors.text}}>{m.text}</Text>
+          </View>
+        ))}
+      </ScrollView>
+
+      <View style={styles.inputRow}>
+        <TextInput value={input} onChangeText={setInput} placeholder="Type your message…" style={styles.input}/>
+        <TouchableOpacity onPress={send} style={styles.send}><Text style={{color:"white"}}>➤</Text></TouchableOpacity>
+      </View>
+    </View>
+  );
+}
+const styles = StyleSheet.create({
+  title:{fontSize:28,fontWeight:"800",color:colors.text},
+  sub:{fontSize:15,color:colors.subtext,marginBottom:10},
+  btn:{backgroundColor:colors.primary,borderRadius:12,alignSelf:"flex-start",paddingHorizontal:16,paddingVertical:10},
+  bubble:{padding:12,borderRadius:14,marginVertical:6,maxWidth:"86%"},
+  me:{alignSelf:"flex-end",backgroundColor:colors.primary},
+  bot:{alignSelf:"flex-start",backgroundColor:"#FFFFFF"},
+  inputRow:{flexDirection:"row",gap:8,padding:12,backgroundColor:"#fff"},
+  input:{flex:1,backgroundColor:"#F3F4F6",borderRadius:14,paddingHorizontal:14},
+  send:{backgroundColor:colors.primary,paddingHorizontal:16,borderRadius:12,justifyContent:"center"}
+});
